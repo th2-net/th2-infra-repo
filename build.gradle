@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.exactpro.th2'
+version = release_version
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api 'org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r'
+    api 'org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:5.10.0.202012080955-r'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.1'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId group
+            artifactId rootProject.name
+            version version
+        }
+    }
+    repositories {
+        maven {
+            url = file("${project.rootDir}/libs")
+//            credentials {
+//                username = ${nexus_user}
+//                password = ${nexus_key}
+//            }
+        }
+    }
+}
+
+jar {
+    into("META-INF/maven/$project.group/$project.name") {
+        from {
+            generatePomFileForMavenJavaPublication
+        }
+        rename ".*", "pom.xml"
+    }
+
+    manifest {
+        attributes(
+                'Created-By': "${System.getProperty('java.version')} (${System.getProperty('java.vendor')})",
+                'Specification-Title': '',
+                'Specification-Vendor': 'Exactpro Systems LLC',
+                'Implementation-Title': project.archivesBaseName,
+                'Implementation-Vendor': 'Exactpro Systems LLC',
+                'Implementation-Vendor-Id': 'com.exactpro',
+                'Implementation-Version': project.version
+        )
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
