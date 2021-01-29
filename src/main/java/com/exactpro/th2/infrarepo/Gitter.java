@@ -264,6 +264,7 @@ public class Gitter {
     /**
      * Commits repository working tree and pushes changes to remote repository
      *
+     * @param message commit message string
      * @return null if working tree was clean and no commit happened or commit ref of latest commit in the remote repository
      * @throws InconsistentRepositoryStateException If commit or push failed and repository's local cache's
      *                                              consistency can not be warranted
