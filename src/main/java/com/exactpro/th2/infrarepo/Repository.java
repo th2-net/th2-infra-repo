@@ -56,7 +56,7 @@ public class Repository {
         Files.writeString(file.toPath(), contents);
     }
 
-    private static Set<RepositoryResource> loadBranch(File repositoryRoot) throws IOException {
+    private static Set<RepositoryResource> loadBranch(File repositoryRoot) {
 
         Logger logger = LoggerFactory.getLogger(Repository.class);
 
@@ -179,6 +179,7 @@ public class Repository {
      *
      * @param gitter Gitter object for which repository will be updated.
      *               Must be locked externally as this method does not lock repository by itself
+     * @param resource RepositoryResource that will be added to the repository
      * @throws IOException              If repository IO operation fails
      * @throws IllegalArgumentException If resource already exists in the repository
      */
@@ -196,8 +197,9 @@ public class Repository {
      *
      * @param gitter Gitter object for which repository will be updated.
      *               Must be locked externally as this method does not lock repository by itself
+     * @param resource RepositoryResource that will be updated in the repository
      * @throws IOException              If repository IO operation fails
-     * @throws IllegalArgumentException If resource already exists in the repository
+     * @throws IllegalArgumentException If resource does not exists in the repository
      */
     public static void update(Gitter gitter, RepositoryResource resource) throws IOException {
 
@@ -213,7 +215,8 @@ public class Repository {
      *
      * @param gitter Gitter object for which repository will be updated.
      *               Must be locked externally as this method does not lock repository by itself
-     * @throws IllegalArgumentException If resource already exists in the repository
+     * @param resource RepositoryResource that will be removed from the repository
+     * @throws IllegalArgumentException If resource does not exists in the repository
      */
     public static void remove(Gitter gitter, RepositoryResource resource) {
 
