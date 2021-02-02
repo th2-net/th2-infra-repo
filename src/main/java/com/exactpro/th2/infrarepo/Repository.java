@@ -37,9 +37,9 @@ import java.util.Set;
 
 public class Repository {
 
-    private static final Logger logger = LoggerFactory.getLogger(Repository.class);
-
     private static RepositoryResource loadYAML(File file) throws IOException {
+
+        Logger logger = LoggerFactory.getLogger(Repository.class);
 
         String contents = Files.readString(file.toPath());
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
@@ -50,8 +50,7 @@ public class Repository {
 
             return resource;
         } catch (JsonParseException e) {
-            logger.error("Bad configuration: property duplication in configuration file \"{}\""
-                    , file.getName());
+            logger.error("property duplication detected in resource: \"{}\"", file.getAbsoluteFile());
             throw new RuntimeException("Configuration exception", e);
         }
     }
