@@ -16,7 +16,6 @@
 
 package com.exactpro.th2.infrarepo;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -44,15 +43,11 @@ public class Repository {
         String contents = Files.readString(file.toPath());
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
                 .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
-        try {
-            RepositoryResource resource = mapper.readValue(contents, RepositoryResource.class);
-            resource.setSourceHash(Repository.digest(contents));
+        RepositoryResource resource = mapper.readValue(contents, RepositoryResource.class);
+        resource.setSourceHash(Repository.digest(contents));
 
-            return resource;
-        } catch (JsonParseException e) {
-            logger.error("property duplication detected in resource: \"{}\"", file.getAbsoluteFile());
-            throw new RuntimeException("Configuration exception", e);
-        }
+        return resource;
+
     }
 
     private static void saveYAML(File file, RepositoryResource resource) throws IOException {
