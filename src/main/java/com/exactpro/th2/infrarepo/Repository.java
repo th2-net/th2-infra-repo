@@ -38,8 +38,6 @@ public class Repository {
 
     private static RepositoryResource loadYAML(File file) throws IOException {
 
-        Logger logger = LoggerFactory.getLogger(Repository.class);
-
         String contents = Files.readString(file.toPath());
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
                 .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
