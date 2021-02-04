@@ -91,7 +91,7 @@ allprojects {
             version {
                 name = project.version
                 desc = project.version
-                released  = new Date()
+                released = new Date()
             }
         }
         publish = true

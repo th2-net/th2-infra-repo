@@ -45,7 +45,6 @@ public class Repository {
         resource.setSourceHash(Repository.digest(contents));
 
         return resource;
-
     }
 
     private static void saveYAML(File file, RepositoryResource resource) throws IOException {
