@@ -37,6 +37,15 @@ public class RepositorySettings {
     private static final String PROPAGATE_RULE = "rule";
 
     private String k8sPropagation = PROPAGATE_OFF;
+    private Keyspace keyspace;
+
+    public Keyspace getKeyspace() {
+        return keyspace;
+    }
+
+    public void setKeyspace(Keyspace keyspace) {
+        this.keyspace = keyspace;
+    }
 
     @JsonGetter("k8s-propagation")
     public String getK8sPropagation() {
