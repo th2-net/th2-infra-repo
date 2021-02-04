@@ -16,6 +16,7 @@
 
 package com.exactpro.th2.infrarepo;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -38,7 +39,8 @@ public class Repository {
     private static RepositoryResource loadYAML(File file) throws IOException {
 
         String contents = Files.readString(file.toPath());
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
+                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
         RepositoryResource resource = mapper.readValue(contents, RepositoryResource.class);
         resource.setSourceHash(Repository.digest(contents));
 
