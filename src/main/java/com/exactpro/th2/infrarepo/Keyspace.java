@@ -5,7 +5,7 @@ public class Keyspace {
     private String initializer;
 
     public String getSchemaVersion() {
-        return schemaVersion;
+        return schemaVersion == null ? "" : schemaVersion;
     }
 
     public void setSchemaVersion(String schemaVersion) {
@@ -13,7 +13,7 @@ public class Keyspace {
     }
 
     public String getInitializer() {
-        return initializer;
+        return initializer == null ? "" : initializer;
     }
 
     public void setInitializer(String initializer) {
