@@ -36,7 +36,22 @@ public class RepositorySettings {
     // git->k8s synchronization on repository or kubernetes change
     private static final String PROPAGATE_RULE = "rule";
 
+    private static final String LOG_LEVEL_ERROR = "ERROR";
+    private static final String LOG_LEVEL_WARNING = "WARNING";
+    private static final String LOG_LEVEL_INFO = "INFO";
+    private static final String LOG_LEVEL_DEBUG = "DEBUG";
+
+    private String logLevel = LOG_LEVEL_INFO;
     private String k8sPropagation = PROPAGATE_OFF;
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        if (logLevel.equals(LOG_LEVEL_ERROR) || logLevel.equals(LOG_LEVEL_WARNING) || logLevel.equals(LOG_LEVEL_DEBUG))
+            this.logLevel = logLevel;
+    }
 
     @JsonGetter("k8s-propagation")
     public String getK8sPropagation() {
