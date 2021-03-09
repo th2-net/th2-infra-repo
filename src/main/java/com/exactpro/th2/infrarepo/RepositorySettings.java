@@ -36,6 +36,12 @@ public class RepositorySettings {
     // git->k8s synchronization on repository or kubernetes change
     private static final String PROPAGATE_RULE = "rule";
 
+    public static final String LOG_LEVEL_ERROR = "ERROR";
+    public static final String LOG_LEVEL_WARNING = "WARNING";
+    public static final String LOG_LEVEL_INFO = "INFO";
+    public static final String LOG_LEVEL_DEBUG = "DEBUG";
+
+    private String logLevel = LOG_LEVEL_INFO;
     private String k8sPropagation = PROPAGATE_OFF;
     private Keyspace keyspace;
 
@@ -45,6 +51,26 @@ public class RepositorySettings {
 
     public void setKeyspace(Keyspace keyspace) {
         this.keyspace = keyspace;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+
+        if (logLevel == null || logLevel.equals("")) {
+            this.logLevel = LOG_LEVEL_INFO;
+            return;
+        }
+
+        if (logLevel.equals(LOG_LEVEL_ERROR) ||
+                logLevel.equals(LOG_LEVEL_WARNING) ||
+                logLevel.equals(LOG_LEVEL_INFO) ||
+                logLevel.equals(LOG_LEVEL_DEBUG))
+            this.logLevel = logLevel;
+        else
+            throw new IllegalArgumentException(String.format("Unknown value (%s)", logLevel));
     }
 
     @JsonGetter("k8s-propagation")
