@@ -92,7 +92,7 @@ public class Repository {
                                     continue;
                                 }
 
-                                if (isNameLengthValid(meta.getName())) {
+                                if (!isNameLengthValid(meta.getName())) {
                                     logger.warn("skipping \"{}\" | resource name must be less than", RESOURCE_NAME_MAX_LENGTH);
                                     continue;
                                 }
