@@ -36,6 +36,8 @@ import java.util.Set;
 
 public class Repository {
 
+    public static final int RESOURCE_NAME_MAX_LENGTH = 31;
+
     private static RepositoryResource loadYAML(File file) throws IOException {
 
         String contents = Files.readString(file.toPath());
@@ -90,6 +92,11 @@ public class Repository {
                                     continue;
                                 }
 
+                                if (!isNameLengthValid(meta.getName())) {
+                                    logger.warn("skipping \"{}\" | resource name must be less than", RESOURCE_NAME_MAX_LENGTH);
+                                    continue;
+                                }
+
                                 if (!ResourceType.forKind(resource.getKind()).path().equals(t.path())) {
                                     logger.error("skipping \"{}\" | resource is located in wrong directory. kind: {}, dir: {}"
                                             , f.getAbsolutePath(), resource.getKind(), t.path());
@@ -141,6 +148,10 @@ public class Repository {
             return fileName;
         else
             return fileName.substring(0, index);
+    }
+
+    private static boolean isNameLengthValid(String resourceName) {
+        return resourceName.length() < RESOURCE_NAME_MAX_LENGTH;
     }
 
     private static String digest(String data) {
