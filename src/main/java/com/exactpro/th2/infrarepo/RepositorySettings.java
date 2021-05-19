@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import java.util.Map;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RepositorySettings {
     // no action will be taken regarding the kubernetes
@@ -36,55 +38,9 @@ public class RepositorySettings {
     // git->k8s synchronization on repository or kubernetes change
     private static final String PROPAGATE_RULE = "rule";
 
-    public static final String LOG_LEVEL_ERROR = "ERROR";
-    public static final String LOG_LEVEL_WARNING = "WARNING";
-    public static final String LOG_LEVEL_INFO = "INFO";
-    public static final String LOG_LEVEL_DEBUG = "DEBUG";
-
-    private String logLevelTh2 = LOG_LEVEL_INFO;
-    private String logLevelRoot = LOG_LEVEL_INFO;
-
     private String k8sPropagation = PROPAGATE_OFF;
 
-    public String getLogLevelTh2() {
-        return logLevelTh2;
-    }
-
-    public String getLogLevelRoot() {
-        return logLevelRoot;
-    }
-
-    public void setLogLevelTh2(String logLevel) {
-
-        if (logLevel == null || logLevel.equals("")) {
-            this.logLevelTh2 = LOG_LEVEL_INFO;
-            return;
-        }
-
-        if (logLevel.equals(LOG_LEVEL_ERROR) ||
-                logLevel.equals(LOG_LEVEL_WARNING) ||
-                logLevel.equals(LOG_LEVEL_INFO) ||
-                logLevel.equals(LOG_LEVEL_DEBUG))
-            this.logLevelTh2 = logLevel;
-        else
-            throw new IllegalArgumentException(String.format("Unknown value (%s)", logLevel));
-    }
-
-    public void setLogLevelRoot(String logLevel) {
-
-        if (logLevel == null || logLevel.equals("")) {
-            this.logLevelRoot = LOG_LEVEL_INFO;
-            return;
-        }
-
-        if (logLevel.equals(LOG_LEVEL_ERROR) ||
-                logLevel.equals(LOG_LEVEL_WARNING) ||
-                logLevel.equals(LOG_LEVEL_INFO) ||
-                logLevel.equals(LOG_LEVEL_DEBUG))
-            this.logLevelRoot = logLevel;
-        else
-            throw new IllegalArgumentException(String.format("Unknown value (%s)", logLevel));
-    }
+    private Th2BoxConfig th2BoxConfig = new Th2BoxConfig();
 
     @JsonGetter("k8s-propagation")
     public String getK8sPropagation() {
@@ -95,6 +51,30 @@ public class RepositorySettings {
     public void setK8sPropagation(String k8sPropagation) {
         if (k8sPropagation != null)
             this.k8sPropagation = k8sPropagation;
+    }
+
+    public Map<String, String> getMqRouter() {
+        return th2BoxConfig.getMqRouter();
+    }
+
+    public Map<String, String> getGrpcRouter() {
+        return th2BoxConfig.getGrpcRouter();
+    }
+
+    public Map<String, String> getCradleManager() {
+        return th2BoxConfig.getCradleManager();
+    }
+
+    public String getLogLevelTh2() {
+        return th2BoxConfig.getLogging().getLogLevelTh2();
+    }
+
+    public String getLogLevelRoot() {
+        return th2BoxConfig.getLogging().getLogLevelRoot();
+    }
+
+    public Th2BoxConfig getTh2BoxConfig() {
+        return th2BoxConfig;
     }
 
     @JsonIgnore
