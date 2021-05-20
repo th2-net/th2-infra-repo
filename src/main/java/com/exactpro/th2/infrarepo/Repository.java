@@ -36,7 +36,7 @@ import java.util.Set;
 
 public class Repository {
 
-    public static final int RESOURCE_NAME_MAX_LENGTH = 101;
+    public static final int RESOURCE_NAME_MAX_LENGTH = 64;
 
     private static RepositoryResource loadYAML(File file) throws IOException {
 
