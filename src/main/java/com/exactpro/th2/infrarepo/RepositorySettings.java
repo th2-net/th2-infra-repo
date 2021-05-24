@@ -42,6 +42,8 @@ public class RepositorySettings {
 
     private Th2BoxConfig th2BoxConfig = new Th2BoxConfig();
 
+    private String keyspace;
+
     @JsonGetter("k8s-propagation")
     public String getK8sPropagation() {
         return k8sPropagation;
@@ -75,6 +77,10 @@ public class RepositorySettings {
 
     public Th2BoxConfig getTh2BoxConfig() {
         return th2BoxConfig;
+    }
+
+    public String getKeyspace() {
+        return keyspace;
     }
 
     @JsonIgnore
