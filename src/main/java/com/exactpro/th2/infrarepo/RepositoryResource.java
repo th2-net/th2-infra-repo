@@ -37,7 +37,8 @@ public class RepositoryResource {
     private String kind;
     private Metadata metadata;
     private Object spec;
-    private String hash;
+    private String sourceHash;
+    private String commitHash;
 
     public RepositoryResource() {
     }
@@ -102,11 +103,21 @@ public class RepositoryResource {
 
     @JsonIgnore
     public String getSourceHash() {
-        return hash;
+        return sourceHash;
     }
 
     @JsonIgnore
     public void setSourceHash(String hash) {
-        this.hash = hash;
+        this.sourceHash = hash;
+    }
+
+    @JsonIgnore
+    public void setCommitHash(String commitHash) {
+        this.commitHash = commitHash;
+    }
+
+    @JsonIgnore
+    public String getCommitHash() {
+        return commitHash;
     }
 }
