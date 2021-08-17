@@ -39,6 +39,7 @@ public class RepositoryResource {
     private Object spec;
     private String sourceHash;
     private String commitHash;
+    private long detectionTime;
 
     public RepositoryResource() {
     }
@@ -112,12 +113,18 @@ public class RepositoryResource {
     }
 
     @JsonIgnore
-    public void setCommitHash(String commitHash) {
+    public void stamp(String commitHash, long detectionTime) {
         this.commitHash = commitHash;
+        this.detectionTime = detectionTime;
     }
 
     @JsonIgnore
     public String getCommitHash() {
         return commitHash;
+    }
+
+    @JsonIgnore
+    public long getDetectionTime() {
+        return detectionTime;
     }
 }
