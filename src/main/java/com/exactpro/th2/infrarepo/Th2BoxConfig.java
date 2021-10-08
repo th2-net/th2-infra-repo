@@ -33,6 +33,10 @@ public class Th2BoxConfig {
         public static final String LOG_LEVEL_WARNING = "WARNING";
         public static final String LOG_LEVEL_INFO = "INFO";
         public static final String LOG_LEVEL_DEBUG = "DEBUG";
+        public static final String LOG_LEVEL_TRACE = "TRACE";
+        public static final String LOG_LEVEL_ALL = "ALL";
+        public static final String LOG_LEVEL_OFF = "OFF";
+        public static final String LOG_LEVEL_FATAL = "FATAL";
 
         private String logLevelTh2 = LOG_LEVEL_INFO;
         private String logLevelRoot = LOG_LEVEL_INFO;
@@ -55,6 +59,10 @@ public class Th2BoxConfig {
             if (logLevel.equals(LOG_LEVEL_ERROR) ||
                     logLevel.equals(LOG_LEVEL_WARNING) ||
                     logLevel.equals(LOG_LEVEL_INFO) ||
+                    logLevel.equals(LOG_LEVEL_OFF) ||
+                    logLevel.equals(LOG_LEVEL_TRACE) ||
+                    logLevel.equals(LOG_LEVEL_ALL) ||
+                    logLevel.equals(LOG_LEVEL_FATAL) ||
                     logLevel.equals(LOG_LEVEL_DEBUG))
                 this.logLevelTh2 = logLevel;
             else
@@ -71,6 +79,10 @@ public class Th2BoxConfig {
             if (logLevel.equals(LOG_LEVEL_ERROR) ||
                     logLevel.equals(LOG_LEVEL_WARNING) ||
                     logLevel.equals(LOG_LEVEL_INFO) ||
+                    logLevel.equals(LOG_LEVEL_OFF) ||
+                    logLevel.equals(LOG_LEVEL_TRACE) ||
+                    logLevel.equals(LOG_LEVEL_ALL) ||
+                    logLevel.equals(LOG_LEVEL_FATAL) ||
                     logLevel.equals(LOG_LEVEL_DEBUG))
                 this.logLevelRoot = logLevel;
             else
