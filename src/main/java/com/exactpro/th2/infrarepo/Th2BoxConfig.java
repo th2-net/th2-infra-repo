@@ -29,14 +29,15 @@ public class Th2BoxConfig {
     }
 
     static class Logging{
+        public static final String LOG_LEVEL_FATAL = "FATAL";
         public static final String LOG_LEVEL_ERROR = "ERROR";
         public static final String LOG_LEVEL_WARNING = "WARNING";
         public static final String LOG_LEVEL_INFO = "INFO";
         public static final String LOG_LEVEL_DEBUG = "DEBUG";
         public static final String LOG_LEVEL_TRACE = "TRACE";
+
         public static final String LOG_LEVEL_ALL = "ALL";
         public static final String LOG_LEVEL_OFF = "OFF";
-        public static final String LOG_LEVEL_FATAL = "FATAL";
 
         private String logLevelTh2 = LOG_LEVEL_INFO;
         private String logLevelRoot = LOG_LEVEL_INFO;

@@ -44,6 +44,8 @@ public class RepositorySettings {
 
     private String keyspace;
 
+    private String bookName;
+
     @JsonGetter("k8s-propagation")
     public String getK8sPropagation() {
         return k8sPropagation;
@@ -81,6 +83,10 @@ public class RepositorySettings {
 
     public String getKeyspace() {
         return keyspace;
+    }
+
+    public String getBookName() {
+        return bookName;
     }
 
     @JsonIgnore
