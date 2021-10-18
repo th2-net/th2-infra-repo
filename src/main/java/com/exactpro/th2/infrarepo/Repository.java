@@ -38,6 +38,8 @@ public class Repository {
 
     public static final int RESOURCE_NAME_MAX_LENGTH = 64;
 
+    public static final String DEFAULT_EXTENSION = ".yml";
+
     private static RepositoryResource loadYAML(File file) throws IOException {
 
         String contents = Files.readString(file.toPath());
@@ -131,14 +133,14 @@ public class Repository {
         return resources;
     }
 
-    private static File fileFor(Gitter gitter, RepositoryResource resource) {
+    private static File fileFor(Gitter gitter, RepositoryResource resource, String extension) {
 
         return new File(
                 gitter.getConfig().getLocalRepositoryRoot()
                         + "/" + gitter.getBranch()
                         + "/" + ResourceType.forKind(resource.getKind()).path()
                         + "/" + resource.getMetadata().getName()
-                        + ".yml");
+                        + extension);
     }
 
     private static String extractName(String fileName) {
@@ -193,15 +195,15 @@ public class Repository {
      * Adds resource to the local repository, but does not commit or push changes.
      * Throws an IllegalArgumentException if resource with same name and kind already exists
      *
-     * @param gitter Gitter object for which repository will be updated.
-     *               Must be locked externally as this method does not lock repository by itself
+     * @param gitter   Gitter object for which repository will be updated.
+     *                 Must be locked externally as this method does not lock repository by itself
      * @param resource RepositoryResource that will be added to the repository
      * @throws IOException              If repository IO operation fails
      * @throws IllegalArgumentException If resource already exists in the repository
      */
     public static void add(Gitter gitter, RepositoryResource resource) throws IOException {
 
-        File file = fileFor(gitter, resource);
+        File file = fileFor(gitter, resource, DEFAULT_EXTENSION);
         if (file.exists())
             throw new IllegalArgumentException("resource already exist");
         Repository.saveYAML(file, resource);
@@ -211,32 +213,39 @@ public class Repository {
      * Updates resource in the local repository, but does not commit or push changes.
      * Throws an IllegalArgumentException if resource does not exists
      *
-     * @param gitter Gitter object for which repository will be updated.
-     *               Must be locked externally as this method does not lock repository by itself
+     * @param gitter   Gitter object for which repository will be updated.
+     *                 Must be locked externally as this method does not lock repository by itself
      * @param resource RepositoryResource that will be updated in the repository
      * @throws IOException              If repository IO operation fails
      * @throws IllegalArgumentException If resource does not exists in the repository
      */
     public static void update(Gitter gitter, RepositoryResource resource) throws IOException {
 
-        File file = fileFor(gitter, resource);
-        if (!file.exists() || !file.isFile())
-            throw new IllegalArgumentException("resource does not exist");
-        Repository.saveYAML(file, resource);
+        String yamlExtension = ".yaml";
+        File fileYml = fileFor(gitter, resource, DEFAULT_EXTENSION);
+        File fileYaml = fileFor(gitter, resource, yamlExtension);
+        if (fileYml.exists() && fileYml.isFile()) {
+            Repository.saveYAML(fileYml, resource);
+            return;
+        }
+        if (fileYaml.exists() && fileYaml.isFile()) {
+            Repository.saveYAML(fileYaml, resource);
+        }
+        throw new IllegalArgumentException("resource does not exist");
     }
 
     /**
      * Removes resource from the local repository, but does not commit or push changes.
      * Throws an IllegalArgumentException if resource does not exists
      *
-     * @param gitter Gitter object for which repository will be updated.
-     *               Must be locked externally as this method does not lock repository by itself
+     * @param gitter   Gitter object for which repository will be updated.
+     *                 Must be locked externally as this method does not lock repository by itself
      * @param resource RepositoryResource that will be removed from the repository
      * @throws IllegalArgumentException If resource does not exists in the repository
      */
     public static void remove(Gitter gitter, RepositoryResource resource) {
 
-        File file = fileFor(gitter, resource);
+        File file = fileFor(gitter, resource, DEFAULT_EXTENSION);
         if (!file.exists() || !file.isFile())
             throw new IllegalArgumentException("resource does not exist");
         file.delete();
