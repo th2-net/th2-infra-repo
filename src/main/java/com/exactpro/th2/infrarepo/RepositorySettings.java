@@ -44,7 +44,7 @@ public class RepositorySettings {
 
     private String keyspace;
 
-    private String bookName;
+    private NamespaceDefaults namespaceDefaults;
 
     @JsonGetter("k8s-propagation")
     public String getK8sPropagation() {
@@ -85,8 +85,8 @@ public class RepositorySettings {
         return keyspace;
     }
 
-    public String getBookName() {
-        return bookName;
+    public NamespaceDefaults getNamespaceDefaults() {
+        return namespaceDefaults;
     }
 
     @JsonIgnore
