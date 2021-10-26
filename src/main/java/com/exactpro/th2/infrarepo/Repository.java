@@ -230,6 +230,7 @@ public class Repository {
         }
         if (fileYaml.exists() && fileYaml.isFile()) {
             Repository.saveYAML(fileYaml, resource);
+            return;
         }
         throw new IllegalArgumentException("resource does not exist");
     }
