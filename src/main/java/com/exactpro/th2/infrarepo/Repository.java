@@ -192,6 +192,32 @@ public class Repository {
     }
 
     /**
+     * This method will checkout latest version from the repository
+     * and will return settings file for it.
+     *
+     * @param gitter Gitter object that will be used to checkout data from the repository.
+     *               Must be locked externally as this method does not lock repository by itself
+     * @return Settings file
+     * @throws IOException     If repository IO operation fails
+     * @throws GitAPIException If git checkout operation fails
+     */
+    public static RepositorySettings getSettings(Gitter gitter) throws IOException, GitAPIException {
+        gitter.checkout();
+        String pathYml = String.format("%s/%s/%s",
+                gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), "infra-mgr-config.yml");
+        File file = new File(pathYml);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(mapper.writeValueAsString(loadYAML(file).getSpec()), RepositorySettings.class);
+        } catch (Exception e) {
+            String pathYaml = String.format("%s/%s/%s",
+                    gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), "infra-mgr-config.yaml");
+            file = new File(pathYaml);
+            return mapper.readValue(mapper.writeValueAsString(loadYAML(file).getSpec()), RepositorySettings.class);
+        }
+    }
+
+    /**
      * Adds resource to the local repository, but does not commit or push changes.
      * Throws an IllegalArgumentException if resource with same name and kind already exists
      *

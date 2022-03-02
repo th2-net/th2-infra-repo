@@ -48,9 +48,7 @@ public class RepositorySnapshot {
         for (RepositoryResource resource : resources)
             if (resource.getKind().equals(ResourceType.SettingsFile.kind())) {
                 ObjectMapper mapper = new ObjectMapper();
-                RepositorySettings s =
-                        mapper.readValue(mapper.writeValueAsString(resource.getSpec()), RepositorySettings.class);
-                return s;
+                return mapper.readValue(mapper.writeValueAsString(resource.getSpec()), RepositorySettings.class);
             }
         return null;
     }
