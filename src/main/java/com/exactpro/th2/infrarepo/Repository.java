@@ -38,7 +38,11 @@ public class Repository {
 
     public static final int RESOURCE_NAME_MAX_LENGTH = 64;
 
-    public static final String DEFAULT_EXTENSION = ".yml";
+    public static final String YML_EXTENSION = ".yml";
+
+    public static final String YAML_EXTENSION = ".yaml";
+
+    private static final ObjectMapper generalMapper = new ObjectMapper();
 
     private static RepositoryResource loadYAML(File file) throws IOException {
 
@@ -203,17 +207,42 @@ public class Repository {
      */
     public static RepositorySettings getSettings(Gitter gitter) throws IOException, GitAPIException {
         gitter.checkout();
+        String settingsFileName = "infra-mgr-config";
         String pathYml = String.format("%s/%s/%s",
-                gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), "infra-mgr-config.yml");
-        File file = new File(pathYml);
-        ObjectMapper mapper = new ObjectMapper();
+                gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), settingsFileName + YML_EXTENSION);
         try {
-            return mapper.readValue(mapper.writeValueAsString(loadYAML(file).getSpec()), RepositorySettings.class);
+            return generalMapper.readValue(
+                    generalMapper.writeValueAsString(loadYAML(new File(pathYml)).getSpec()), RepositorySettings.class
+            );
         } catch (Exception e) {
             String pathYaml = String.format("%s/%s/%s",
-                    gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), "infra-mgr-config.yaml");
-            file = new File(pathYaml);
-            return mapper.readValue(mapper.writeValueAsString(loadYAML(file).getSpec()), RepositorySettings.class);
+                    gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), settingsFileName + YAML_EXTENSION);
+            return generalMapper.readValue(
+                    generalMapper.writeValueAsString(loadYAML(new File(pathYaml)).getSpec()), RepositorySettings.class
+            );
+        }
+    }
+
+    /**
+     * This method is called on already checkout version of the repository
+     * and will return file for given name parameter.
+     *
+     * @param gitter       Gitter object that will be used to checkout data from the repository.
+     *                     Must be locked externally as this method does not lock repository by itself
+     * @param resourceName name of the RepositoryResource that will be loaded from the the repository
+     * @return loaded RepositoryResource
+     * @throws IOException If repository IO operation fails
+     */
+    public static RepositoryResource getResource(Gitter gitter, String kind, String resourceName) throws IOException {
+        String kindPath = ResourceType.forKind(kind).path();
+        String pathYml = String.format("%s/%s/%s/%s",
+                gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), kindPath, resourceName + YML_EXTENSION);
+        try {
+            return loadYAML(new File(pathYml));
+        } catch (Exception e) {
+            String pathYaml = String.format("%s/%s/%s/%s",
+                    gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), kindPath, resourceName + YAML_EXTENSION);
+            return loadYAML(new File(pathYaml));
         }
     }
 
@@ -229,7 +258,7 @@ public class Repository {
      */
     public static void add(Gitter gitter, RepositoryResource resource) throws IOException {
 
-        File file = fileFor(gitter, resource, DEFAULT_EXTENSION);
+        File file = fileFor(gitter, resource, YML_EXTENSION);
         if (file.exists())
             throw new IllegalArgumentException("resource already exist");
         Repository.saveYAML(file, resource);
@@ -248,7 +277,7 @@ public class Repository {
     public static void update(Gitter gitter, RepositoryResource resource) throws IOException {
 
         String yamlExtension = ".yaml";
-        File fileYml = fileFor(gitter, resource, DEFAULT_EXTENSION);
+        File fileYml = fileFor(gitter, resource, YML_EXTENSION);
         File fileYaml = fileFor(gitter, resource, yamlExtension);
         if (fileYml.exists() && fileYml.isFile()) {
             Repository.saveYAML(fileYml, resource);
@@ -272,7 +301,7 @@ public class Repository {
      */
     public static void remove(Gitter gitter, RepositoryResource resource) {
 
-        File file = fileFor(gitter, resource, DEFAULT_EXTENSION);
+        File file = fileFor(gitter, resource, YML_EXTENSION);
         if (!file.exists() || !file.isFile())
             throw new IllegalArgumentException("resource does not exist");
         file.delete();
