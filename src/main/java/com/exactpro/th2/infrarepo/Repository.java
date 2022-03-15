@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -214,7 +215,7 @@ public class Repository {
             return generalMapper.readValue(
                     generalMapper.writeValueAsString(loadYAML(new File(pathYml)).getSpec()), RepositorySettings.class
             );
-        } catch (Exception e) {
+        } catch (NoSuchFileException e) {
             String pathYaml = String.format("%s/%s/%s",
                     gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), settingsFileName + YAML_EXTENSION);
             return generalMapper.readValue(

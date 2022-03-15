@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class RepositorySettings {
     // no action will be taken regarding the kubernetes
     private static final String PROPAGATE_OFF = "off";
