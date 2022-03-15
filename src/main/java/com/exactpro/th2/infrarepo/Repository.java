@@ -117,10 +117,10 @@ public class Repository {
 
                                 String name = meta.getName();
                                 RepositoryResource sameNameResource = firstOccurrences.get(name);
-                                if (sameNameResource != null && !sameNameResource.getKind().equals(resource.getKind())) {
+                                if (sameNameResource != null) {
                                     // we already encountered resource with same name
                                     // ignore both of them
-                                    logger.warn("\"{}/{}\" has the same name as \"{}/{}\". skipping both of them. this may cause \"{}\" to be undeployed",
+                                    logger.error("\"{}/{}\" has the same name as \"{}/{}\". skipping both of them. this may cause \"{}\" to be undeployed",
                                             resource.getKind(), name,
                                             sameNameResource.getKind(), name,
                                             name);
