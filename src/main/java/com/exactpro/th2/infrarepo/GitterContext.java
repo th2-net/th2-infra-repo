@@ -16,10 +16,7 @@
 
 package com.exactpro.th2.infrarepo;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GitterContext implements GitConfig {
@@ -27,8 +24,7 @@ public class GitterContext implements GitConfig {
     private final String httpAuthUsername;
     private final String httpAuthPassword;
     private final String localRepositoryRoot;
-    private final boolean ignoreInsecureHosts;
-    private final String privateKeyFile;
+    private final String sshDir;
     private final byte[] privateKey;
 
     private volatile Map<String, Gitter> gitters;
@@ -110,8 +106,7 @@ public class GitterContext implements GitConfig {
         httpAuthUsername = config.getHttpAuthUsername();
         httpAuthPassword = config.getHttpAuthPassword();
         localRepositoryRoot = config.getLocalRepositoryRoot();
-        ignoreInsecureHosts = config.ignoreInsecureHosts();
-        privateKeyFile = config.getPrivateKeyFile();
+        sshDir = config.getSshDir();
         privateKey = config.getPrivateKey();
     }
 
@@ -131,18 +126,13 @@ public class GitterContext implements GitConfig {
     }
 
     @Override
-    public boolean ignoreInsecureHosts() {
-        return ignoreInsecureHosts;
-    }
-
-    @Override
     public String getLocalRepositoryRoot() {
         return localRepositoryRoot;
     }
 
     @Override
-    public String getPrivateKeyFile() {
-        return privateKeyFile;
+    public String getSshDir() {
+        return sshDir;
     }
 
     @Override
@@ -157,12 +147,11 @@ public class GitterContext implements GitConfig {
         if (!(o instanceof GitterContext))
             return false;
         GitterContext c = (GitterContext) o;
-        return this.ignoreInsecureHosts == c.ignoreInsecureHosts &&
-                Objects.equals(this.localRepositoryRoot, c.localRepositoryRoot) &&
+        return Objects.equals(this.localRepositoryRoot, c.localRepositoryRoot) &&
                 Objects.equals(this.remoteRepository, c.remoteRepository) &&
                 Objects.equals(this.httpAuthUsername, c.httpAuthUsername) &&
                 Objects.equals(this.httpAuthPassword, c.httpAuthPassword) &&
-                Objects.equals(this.privateKeyFile, c.privateKeyFile) &&
+                Objects.equals(this.sshDir, c.sshDir) &&
                 Arrays.equals(this.privateKey, c.privateKey);
     }
 

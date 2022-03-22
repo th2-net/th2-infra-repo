@@ -136,8 +136,8 @@ clean {
 
 
 dependencies {
-    api 'org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r'
-    api 'org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:5.10.0.202012080955-r'
+    api 'org.eclipse.jgit:org.eclipse.jgit:6.1.0.202203080745-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.1.0.202203080745-r'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.1'
 }
 
