@@ -16,8 +16,6 @@
 
 package com.exactpro.th2.infrarepo;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
@@ -30,6 +28,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.transport.sshd.SshdSessionFactory;
+import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
 
@@ -117,23 +117,12 @@ public class Gitter {
                         config.getHttpAuthPassword()));
 
             } else if (transport instanceof SshTransport) {
-
-                if (config.ignoreInsecureHosts())
-                    JSch.setConfig("StrictHostKeyChecking", "no");
-                SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
-                    @Override
-                    protected JSch createDefaultJSch(FS fs) throws JSchException {
-                        JSch defaultJSch = super.createDefaultJSch(fs);
-
-                        if (config.getPrivateKey() != null)
-                            defaultJSch.addIdentity("gitter-key", config.getPrivateKey(), null, null);
-                        else if (config.getPrivateKeyFile() != null)
-                            defaultJSch.addIdentity(config.getPrivateKeyFile());
-                        else
-                            throw new IllegalArgumentException("repository private key not set");
-                        return defaultJSch;
-                    }
-                };
+                File sshDir = new File(config.getSshDir());
+                SshdSessionFactory sshSessionFactory = new SshdSessionFactoryBuilder()
+                        .setPreferredAuthentications("publickey")
+                        .setHomeDirectory(FS.DETECTED.userHome())
+                        .setSshDirectory(sshDir)
+                        .build(null);
                 SshTransport sshTransport = (SshTransport) transport;
                 sshTransport.setSshSessionFactory(sshSessionFactory);
 
