@@ -23,11 +23,9 @@ public interface GitConfig {
 
     String getHttpAuthPassword();
 
-    boolean ignoreInsecureHosts();
-
     String getLocalRepositoryRoot();
 
-    String getPrivateKeyFile();
+    String getSshDir();
 
     byte[] getPrivateKey();
 }
