@@ -4,23 +4,23 @@ import java.util.Map;
 
 public class Th2BoxConfig {
 
-    private Map<String, String> mqRouter;
+    private Map<String, Object> mqRouter;
 
-    private Map<String, String> grpcRouter;
+    private Map<String, Object> grpcRouter;
 
-    private Map<String, String> cradleManager;
+    private Map<String, Object> cradleManager;
 
     private Logging logging = new Logging();
 
-    public Map<String, String> getMqRouter() {
+    public Map<String, Object> getMqRouter() {
         return mqRouter;
     }
 
-    public Map<String, String> getGrpcRouter() {
+    public Map<String, Object> getGrpcRouter() {
         return grpcRouter;
     }
 
-    public Map<String, String> getCradleManager() {
+    public Map<String, Object> getCradleManager() {
         return cradleManager;
     }
 

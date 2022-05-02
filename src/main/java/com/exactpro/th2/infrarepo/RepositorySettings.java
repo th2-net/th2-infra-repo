@@ -56,15 +56,15 @@ public class RepositorySettings {
             this.k8sPropagation = k8sPropagation;
     }
 
-    public Map<String, String> getMqRouter() {
+    public Map<String, Object> getMqRouter() {
         return th2BoxConfig.getMqRouter();
     }
 
-    public Map<String, String> getGrpcRouter() {
+    public Map<String, Object> getGrpcRouter() {
         return th2BoxConfig.getGrpcRouter();
     }
 
-    public Map<String, String> getCradleManager() {
+    public Map<String, Object> getCradleManager() {
         return th2BoxConfig.getCradleManager();
     }
 
