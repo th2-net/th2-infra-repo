@@ -18,7 +18,6 @@ package com.exactpro.th2.infrarepo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 import java.util.Map;
@@ -32,6 +31,7 @@ public class RepositorySettings {
 
     // git->k8s synchronization on repository changes
     private static final String PROPAGATE_SYNC = "sync";
+
     private static final String PROPAGATE_TRUE = "true";
 
     // git->k8s synchronization on repository or kubernetes change
@@ -52,8 +52,9 @@ public class RepositorySettings {
 
     @JsonSetter("k8s-propagation")
     public void setK8sPropagation(String k8sPropagation) {
-        if (k8sPropagation != null)
+        if (k8sPropagation != null) {
             this.k8sPropagation = k8sPropagation;
+        }
     }
 
     public Map<String, Object> getMqRouter() {

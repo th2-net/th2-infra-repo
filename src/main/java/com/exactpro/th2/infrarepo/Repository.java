@@ -80,42 +80,47 @@ public class Repository {
                 }
 
                 File[] files = dir.listFiles();
-                if (files == null)
+                if (files == null) {
                     return resources;
+                }
 
-                for (File f : files)
-                    if (f.isFile() && (f.getAbsolutePath().endsWith(".yml") || f.getAbsolutePath().endsWith(".yaml")))
+                for (File f : files) {
+                    if (f.isFile() && (f.getAbsolutePath().endsWith(".yml") || f.getAbsolutePath().endsWith(".yaml"))) {
                         try {
                             RepositoryResource resource = Repository.loadYAML(f);
                             RepositoryResource.Metadata meta = resource.getMetadata();
 
                             if (meta == null || !extractName(f.getName()).equals(meta.getName())) {
-                                logger.warn("skipping \"{}\" | resource name does not match filename", f.getAbsolutePath());
+                                logger.warn("skipping \"{}\" | resource name does not match filename",
+                                        f.getAbsolutePath());
                                 continue;
                             }
 
                             if (!isNameLengthValid(meta.getName())) {
-                                logger.warn("skipping \"{}\" | resource name must be less than {} characters", meta.getName(), RESOURCE_NAME_MAX_LENGTH);
+                                logger.warn("skipping \"{}\" | resource name must be less than {} characters",
+                                        meta.getName(), RESOURCE_NAME_MAX_LENGTH);
                                 continue;
                             }
 
                             if (!ResourceType.forKind(resource.getKind()).path().equals(kind.path())) {
-                                logger.error("skipping \"{}\" | resource is located in wrong directory. kind: {}, dir: {}"
-                                        , f.getAbsolutePath(), resource.getKind(), kind.path());
+                                logger.error("skipping \"{}\" | resource is located in wrong directory. kind" +
+                                        ": {}, dir:" + " {}" , f.getAbsolutePath(), resource.getKind(), kind.path());
                                 continue;
                             }
 
                             // some directories might contain multiple resource kinds
                             // skip other kinds as they will be checked on their iteration
-                            if (!resource.getKind().equals(kind.kind()))
+                            if (!resource.getKind().equals(kind.kind())) {
                                 continue;
+                            }
 
                             String name = meta.getName();
                             RepositoryResource sameNameResource = firstOccurrences.get(name);
                             if (sameNameResource != null) {
                                 // we already encountered resource with same name
                                 // ignore both of them
-                                logger.error("\"{}/{}\" has the same name as \"{}/{}\". skipping both of them. this may cause \"{}\" to be undeployed",
+                                logger.error("\"{}/{}\" has the same name as \"{}/{}\". " +
+                                                "skipping both of them. this may cause \"{}\" to be undeployed",
                                         resource.getKind(), name,
                                         sameNameResource.getKind(), name,
                                         name);
@@ -128,6 +133,8 @@ public class Repository {
                         } catch (Exception e) {
                             logger.error("skipping \"{}\" | exception loading resource", f.getAbsolutePath(), e);
                         }
+                    }
+                }
             }
         }
         return resources;
@@ -156,10 +163,11 @@ public class Repository {
     private static String extractName(String fileName) {
 
         int index = fileName.lastIndexOf(".");
-        if (index < 0)
+        if (index < 0) {
             return fileName;
-        else
+        } else {
             return fileName.substring(0, index);
+        }
     }
 
     private static boolean isNameLengthValid(String resourceName) {
@@ -171,8 +179,9 @@ public class Repository {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] digest = md.digest(data.getBytes());
             StringBuilder sb = new StringBuilder();
-            for (byte b : digest)
+            for (byte b : digest) {
                 sb.append(String.format("%02x", b));
+            }
 
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
@@ -191,7 +200,8 @@ public class Repository {
      * @throws IOException     If repository IO operation fails
      * @throws GitAPIException If git checkout operation fails
      */
-    public static Set<RepositoryResource> getResourcesByKind(Gitter gitter, ResourceType kind) throws IOException, GitAPIException {
+    public static Set<RepositoryResource> getResourcesByKind(Gitter gitter, ResourceType kind)
+            throws IOException, GitAPIException {
 
         String path = gitter.getConfig().getLocalRepositoryRoot() + "/" + gitter.getBranch();
         gitter.checkout();
@@ -260,13 +270,13 @@ public class Repository {
      */
     public static RepositoryResource getResource(Gitter gitter, String kind, String resourceName) throws IOException {
         String kindPath = ResourceType.forKind(kind).path();
-        String pathYml = String.format("%s/%s/%s/%s",
-                gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), kindPath, resourceName + YML_EXTENSION);
+        String pathYml = String.format("%s/%s/%s/%s", gitter.getConfig().getLocalRepositoryRoot(),
+                gitter.getBranch(), kindPath, resourceName + YML_EXTENSION);
         try {
             return loadYAML(new File(pathYml));
         } catch (Exception e) {
-            String pathYaml = String.format("%s/%s/%s/%s",
-                    gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), kindPath, resourceName + YAML_EXTENSION);
+            String pathYaml = String.format("%s/%s/%s/%s", gitter.getConfig().getLocalRepositoryRoot(),
+                    gitter.getBranch(), kindPath, resourceName + YAML_EXTENSION);
             return loadYAML(new File(pathYaml));
         }
     }
@@ -284,8 +294,9 @@ public class Repository {
     public static void add(Gitter gitter, RepositoryResource resource) throws IOException {
 
         File file = fileFor(gitter, resource, YML_EXTENSION);
-        if (file.exists())
+        if (file.exists()) {
             throw new IllegalArgumentException("resource already exist");
+        }
         Repository.saveYAML(file, resource);
     }
 
@@ -327,8 +338,9 @@ public class Repository {
     public static void remove(Gitter gitter, RepositoryResource resource) {
 
         File file = fileFor(gitter, resource, YML_EXTENSION);
-        if (!file.exists() || !file.isFile())
+        if (!file.exists() || !file.isFile()) {
             throw new IllegalArgumentException("resource does not exist");
+        }
         file.delete();
     }
 
