@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'checkstyle'
     id 'java-library'
     id 'maven-publish'
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
@@ -32,6 +33,10 @@ repositories {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
         resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
     }
+}
+
+checkstyle {
+    toolVersion = "8.26"
 }
 
 java {

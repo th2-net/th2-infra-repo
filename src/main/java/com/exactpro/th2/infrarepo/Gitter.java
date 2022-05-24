@@ -43,10 +43,15 @@ public class Gitter {
     public static final String REFS_HEADS = "refs/heads/";
 
     private GitterContext ctx;
+
     private String branch;
+
     private Lock lock;
+
     private TransportConfigCallback callback;
+
     private final String localCacheRoot;
+
     private final String repositoryDir;
 
     Gitter(GitterContext ctx, String branch) {
@@ -127,7 +132,8 @@ public class Gitter {
                 sshTransport.setSshSessionFactory(sshSessionFactory);
 
             } else {
-                throw new RuntimeException(String.format("Unknown transport type (%s)", transport.getClass().getName()));
+                throw new RuntimeException(
+                        String.format("Unknown transport type (%s)", transport.getClass().getName()));
             }
         };
     }
@@ -160,8 +166,9 @@ public class Gitter {
 
         // create branch directory if it does not exist
         File dir = new File(targetDir);
-        if (!dir.exists() && !dir.mkdirs())
+        if (!dir.exists() && !dir.mkdirs()) {
             throw new IOException(String.format("Error creating repository directory %s", targetDir));
+        }
 
         Repository repo = new FileRepository(repositoryDir);
         Git git = new Git(repo);
@@ -246,7 +253,8 @@ public class Gitter {
             FileUtils.delete(rootDir, FileUtils.RECURSIVE);
             return checkout();
         } catch (IOException ioe) {
-            throw new IOException(String.format("Error deleting local repository cache for branch \"%s\"", branch), ioe);
+            throw new IOException(
+                    String.format("Error deleting local repository cache for branch \"%s\"", branch), ioe);
         }
     }
 
@@ -254,19 +262,23 @@ public class Gitter {
      * Commits repository working tree and pushes changes to remote repository
      *
      * @param message commit message string
-     * @return null if working tree was clean and no commit happened or commit ref of latest commit in the remote repository
-     * @throws InconsistentRepositoryStateException If commit or push failed and repository's local cache's
-     *                                              consistency can not be warranted
+     * @return null if working tree was clean and no commit happened
+     * or commit ref of latest commit in the remote repository
+     * @throws InconsistentRepositoryStateException
+     * If commit or push failed and repository's local cache's
+     * consistency can not be warranted
      * @throws IOException
      * @throws GitAPIException
      */
-    public String commitAndPush(String message) throws IOException, GitAPIException, InconsistentRepositoryStateException {
+    public String commitAndPush(String message)
+            throws IOException, GitAPIException, InconsistentRepositoryStateException {
 
         checkAndGetLocalCacheRoot();
         Repository repo = new FileRepository(repositoryDir);
         Git git = new Git(repo);
-        if (git.status().call().isClean())
+        if (git.status().call().isClean()) {
             return null;
+        }
 
         git.add()
                 .setUpdate(true)
@@ -297,12 +309,13 @@ public class Gitter {
                 RemoteRefUpdate update = pushResult.getRemoteUpdate(ref);
                 if (update != null) {
 
-                    if (update.getStatus() == RemoteRefUpdate.Status.OK)
+                    if (update.getStatus() == RemoteRefUpdate.Status.OK) {
                         return commitRef;
-                    else
+                    } else {
                         throw new InconsistentRepositoryStateException(
                                 String.format("Exception pushing branch \"%s\" to remote: %s"
                                         , branch, update.getStatus().name()));
+                    }
                 }
             }
 
@@ -328,10 +341,12 @@ public class Gitter {
     public String createBranch(String sourceBranch) throws Exception {
 
         Set<String> branches = getBranches(ctx);
-        if (!branches.contains(sourceBranch))
+        if (!branches.contains(sourceBranch)) {
             throw new IllegalArgumentException("Source branch does not exists");
-        if (branches.contains(branch))
+        }
+        if (branches.contains(branch)) {
             throw new EntryExistsException("Branch with such name already exists");
+        }
 
         try {
             checkout(sourceBranch, localCacheRoot);
@@ -364,8 +379,9 @@ public class Gitter {
     private File checkAndGetLocalCacheRoot() {
 
         File dir = new File(localCacheRoot);
-        if (!dir.exists())
+        if (!dir.exists()) {
             throw new IllegalArgumentException("branch does not exist locally");
+        }
         return dir;
     }
 

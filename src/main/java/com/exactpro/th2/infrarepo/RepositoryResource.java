@@ -34,11 +34,17 @@ public class RepositoryResource {
     }
 
     private String apiVersion;
+
     private String kind;
+
     private Metadata metadata;
+
     private Object spec;
+
     private String sourceHash;
+
     private String commitHash;
+
     private long detectionTime;
 
     public RepositoryResource() {

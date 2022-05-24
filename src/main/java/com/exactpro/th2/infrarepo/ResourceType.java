@@ -33,8 +33,11 @@ public enum ResourceType {
     UIFile("UIFile", "ui-files", null, null);
 
     private final String kind;
+
     private final String path;
+
     private final String k8sName;
+
     private final String k8sApiVersion;
 
     ResourceType(String kind, String path, String k8sName, String k8sApiVersion) {
@@ -77,6 +80,7 @@ public enum ResourceType {
     }
 
     private static final Map<String, ResourceType> kinds = new HashMap<>();
+
     private static final Map<String, ResourceType> paths = new HashMap<>();
 
     static {

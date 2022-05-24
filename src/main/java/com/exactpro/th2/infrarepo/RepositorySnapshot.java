@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 
 public class RepositorySnapshot {
+
     private String commitRef;
+
     private Set<RepositoryResource> resources;
 
     public RepositorySnapshot(String commitRef) {
@@ -45,11 +47,12 @@ public class RepositorySnapshot {
     @JsonIgnore
     public RepositorySettings getRepositorySettings() throws JsonProcessingException {
 
-        for (RepositoryResource resource : resources)
+        for (RepositoryResource resource : resources) {
             if (resource.getKind().equals(ResourceType.SettingsFile.kind())) {
                 ObjectMapper mapper = new ObjectMapper();
                 return mapper.readValue(mapper.writeValueAsString(resource.getSpec()), RepositorySettings.class);
             }
+        }
         return null;
     }
 

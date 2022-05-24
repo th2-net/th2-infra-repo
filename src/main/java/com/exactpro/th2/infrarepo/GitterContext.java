@@ -21,13 +21,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GitterContext implements GitConfig {
     private final String remoteRepository;
+
     private final String httpAuthUsername;
+
     private final String httpAuthPassword;
+
     private final String localRepositoryRoot;
+
     private final String sshDir;
+
     private final byte[] privateKey;
 
     private volatile Map<String, Gitter> gitters;
+
     private static volatile Map<GitterContext, GitterContext> contexts;
 
     /**
@@ -41,8 +47,9 @@ public class GitterContext implements GitConfig {
 
         if (contexts == null) {
             synchronized (GitterContext.class) {
-                if (contexts == null)
+                if (contexts == null) {
                     contexts = new ConcurrentHashMap<>();
+                }
             }
         }
 
@@ -142,10 +149,12 @@ public class GitterContext implements GitConfig {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof GitterContext))
+        }
+        if (!(o instanceof GitterContext)) {
             return false;
+        }
         GitterContext c = (GitterContext) o;
         return Objects.equals(this.localRepositoryRoot, c.localRepositoryRoot) &&
                 Objects.equals(this.remoteRepository, c.remoteRepository) &&
