@@ -16,6 +16,7 @@
 
 package com.exactpro.th2.infrarepo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -56,9 +57,11 @@ public class Repository {
     private static void saveYAML(File file, RepositoryResource resource) throws IOException {
 
         file.getParentFile().mkdir();
-        ObjectMapper mapper = new ObjectMapper((new YAMLFactory())
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES));
+        ObjectMapper mapper = new ObjectMapper(
+                new YAMLFactory()
+                        .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                        .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+        ).setSerializationInclusion(JsonInclude.Include.NON_NULL);
         String contents = mapper.writeValueAsString(resource);
         resource.setSourceHash(Repository.digest(contents));
         Files.writeString(file.toPath(), contents);
@@ -104,7 +107,7 @@ public class Repository {
 
                             if (!ResourceType.forKind(resource.getKind()).path().equals(kind.path())) {
                                 logger.error("skipping \"{}\" | resource is located in wrong directory. kind" +
-                                        ": {}, dir:" + " {}" , f.getAbsolutePath(), resource.getKind(), kind.path());
+                                        ": {}, dir:" + " {}", f.getAbsolutePath(), resource.getKind(), kind.path());
                                 continue;
                             }
 
@@ -195,7 +198,7 @@ public class Repository {
      *
      * @param gitter Gitter object that will be used to checkout data from the repository.
      *               Must be locked externally as this method does not lock repository by itself
-     * @param kind what kind of resources to load
+     * @param kind   what kind of resources to load
      * @return Latest versions of resources for given kind
      * @throws IOException     If repository IO operation fails
      * @throws GitAPIException If git checkout operation fails
