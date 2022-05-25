@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RepositoryResource {
 
     public static class Metadata {
-        private String name;
+        private final String name;
 
         public String getName() {
             return name;
@@ -51,8 +51,14 @@ public class RepositoryResource {
     }
 
     public RepositoryResource(ResourceType type) {
-        this.apiVersion = type.k8sApiVersion();
         this.kind = type.name();
+    }
+
+    public RepositoryResource(String apiVersion, String kind, Metadata metadata, Object spec) {
+        this.apiVersion = apiVersion;
+        this.kind = kind;
+        this.metadata = metadata;
+        this.spec = spec;
     }
 
     public String getApiVersion() {
@@ -69,7 +75,6 @@ public class RepositoryResource {
 
     public void setKind(String kind) {
         this.kind = kind;
-        this.apiVersion = ResourceType.forKind(kind).k8sApiVersion();
     }
 
     public Metadata getMetadata() {
