@@ -264,6 +264,7 @@ public class Repository {
      *
      * @param gitter       Gitter object that will be used to checkout data from the repository.
      *                     Must be locked externally as this method does not lock repository by itself
+     * @param kind         Kind of resource
      * @param resourceName name of the RepositoryResource that will be loaded from the the repository
      * @return loaded RepositoryResource
      * @throws IOException If repository IO operation fails
