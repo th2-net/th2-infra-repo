@@ -41,7 +41,7 @@ public class RepositorySettings {
 
     private Th2BoxConfig th2BoxConfig = new Th2BoxConfig();
 
-    private String keyspace;
+    private CradleConfig cradle = new CradleConfig();
 
     private BookConfig bookConfig;
 
@@ -81,12 +81,12 @@ public class RepositorySettings {
         return th2BoxConfig;
     }
 
-    public String getKeyspace() {
-        return keyspace;
-    }
-
     public BookConfig getBookConfig() {
         return bookConfig;
+    }
+
+    public CradleConfig getCradle() {
+        return cradle;
     }
 
     @JsonIgnore
