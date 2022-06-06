@@ -16,6 +16,8 @@
 
 package com.exactpro.th2.infrarepo;
 
+import com.exactpro.th2.infrarepo.repo.RepositoryResource;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

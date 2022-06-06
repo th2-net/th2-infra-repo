@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.repo;
 
+import com.exactpro.th2.infrarepo.ResourceType;
+import com.exactpro.th2.infrarepo.git.Gitter;
+import com.exactpro.th2.infrarepo.settings.RepositorySettingsResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,7 +57,7 @@ public class Repository {
         return resource;
     }
 
-    private static void saveYAML(File file, RepositoryResource resource) throws IOException {
+    private static <T> void saveYAML(File file, GenericResource<T> resource) throws IOException {
 
         file.getParentFile().mkdir();
         ObjectMapper mapper = new ObjectMapper(
@@ -153,7 +156,7 @@ public class Repository {
         return resources;
     }
 
-    private static File fileFor(Gitter gitter, RepositoryResource resource, String extension) {
+    private static <T> File fileFor(Gitter gitter, GenericResource<T> resource, String extension) {
 
         return new File(
                 gitter.getConfig().getLocalRepositoryRoot()
@@ -267,20 +270,20 @@ public class Repository {
      * @throws IOException     If repository IO operation fails
      * @throws GitAPIException If git checkout operation fails
      */
-    public static RepositorySettings getSettings(Gitter gitter) throws IOException, GitAPIException {
+    public static RepositorySettingsResource getSettings(Gitter gitter) throws IOException, GitAPIException {
         gitter.checkout();
         String settingsFileName = "infra-mgr-config";
         String pathYml = String.format("%s/%s/%s",
                 gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), settingsFileName + YML_EXTENSION);
         try {
             return generalMapper.readValue(
-                    generalMapper.writeValueAsString(loadYAML(new File(pathYml)).getSpec()), RepositorySettings.class
+                    generalMapper.writeValueAsString(loadYAML(new File(pathYml))), RepositorySettingsResource.class
             );
         } catch (NoSuchFileException e) {
             String pathYaml = String.format("%s/%s/%s",
                     gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), settingsFileName + YAML_EXTENSION);
             return generalMapper.readValue(
-                    generalMapper.writeValueAsString(loadYAML(new File(pathYaml)).getSpec()), RepositorySettings.class
+                    generalMapper.writeValueAsString(loadYAML(new File(pathYml))), RepositorySettingsResource.class
             );
         }
     }
@@ -338,7 +341,7 @@ public class Repository {
      * @throws IOException              If repository IO operation fails
      * @throws IllegalArgumentException If resource does not exists in the repository
      */
-    public static void update(Gitter gitter, RepositoryResource resource) throws IOException {
+    public static <T> void update(Gitter gitter, GenericResource<T> resource) throws IOException {
 
         String yamlExtension = ".yaml";
         File fileYml = fileFor(gitter, resource, YML_EXTENSION);

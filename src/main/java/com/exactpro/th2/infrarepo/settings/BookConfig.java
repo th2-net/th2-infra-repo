@@ -14,42 +14,21 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.settings;
 
-public class CradleConfig {
-    private String keyspace;
+import java.util.List;
 
-    private String host;
+public class BookConfig {
 
-    private int port;
+    private List<String> bookNames;
 
-    private String dataCenter;
+    private String defaultBook;
 
-    private String username;
-
-    private boolean useCustomPassword;
-
-    public String getKeyspace() {
-        return keyspace;
+    public List<String> getBookNames() {
+        return bookNames;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public String getDataCenter() {
-        return dataCenter;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public boolean isUseCustomPassword() {
-        return useCustomPassword;
+    public String getDefaultBook() {
+        return defaultBook;
     }
 }

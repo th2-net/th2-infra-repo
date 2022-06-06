@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.repo;
 
+import com.exactpro.th2.infrarepo.ResourceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RepositoryResource {
-
+public class GenericResource<T> {
     public static class Metadata {
         private final String name;
 
@@ -39,7 +39,7 @@ public class RepositoryResource {
 
     private Metadata metadata;
 
-    private Object spec;
+    private T spec;
 
     private String sourceHash;
 
@@ -47,14 +47,14 @@ public class RepositoryResource {
 
     private long detectionTime;
 
-    public RepositoryResource() {
+    public GenericResource() {
     }
 
-    public RepositoryResource(ResourceType type) {
+    public GenericResource(ResourceType type) {
         this.kind = type.name();
     }
 
-    public RepositoryResource(String apiVersion, String kind, Metadata metadata, Object spec) {
+    public GenericResource(String apiVersion, String kind, Metadata metadata, T spec) {
         this.apiVersion = apiVersion;
         this.kind = kind;
         this.metadata = metadata;
@@ -85,17 +85,17 @@ public class RepositoryResource {
         this.metadata = metadata;
     }
 
-    public Object getSpec() {
+    public T getSpec() {
         return spec;
     }
 
-    public void setSpec(Object spec) {
+    public void setSpec(T spec) {
         this.spec = spec;
     }
 
     @JsonIgnore
     public String getApiGroup() {
-        return RepositoryResource.getApiGroup(apiVersion);
+        return GenericResource.getApiGroup(apiVersion);
     }
 
     @JsonIgnore
@@ -105,7 +105,7 @@ public class RepositoryResource {
 
     @JsonIgnore
     public String getVersion() {
-        return RepositoryResource.getVersion(apiVersion);
+        return GenericResource.getVersion(apiVersion);
     }
 
     @JsonIgnore

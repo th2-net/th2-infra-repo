@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.git;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

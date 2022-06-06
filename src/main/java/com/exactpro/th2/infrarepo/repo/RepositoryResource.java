@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.repo;
 
-public interface GitConfig {
-    String getRemoteRepository();
+public class RepositoryResource extends GenericResource<Object> {
 
-    String getHttpAuthUsername();
+    public RepositoryResource() {
+    }
 
-    String getHttpAuthPassword();
-
-    String getLocalRepositoryRoot();
-
-    String getSshDir();
-
-    byte[] getPrivateKey();
+    public RepositoryResource(String apiVersion, String kind, Metadata metadata, Object spec) {
+        super(apiVersion, kind, metadata, spec);
+    }
 }
