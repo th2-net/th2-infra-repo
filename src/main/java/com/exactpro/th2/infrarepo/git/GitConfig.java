@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.git;
 
-import java.util.List;
+public interface GitConfig {
+    String getRemoteRepository();
 
-public class BookConfig {
+    String getHttpAuthUsername();
 
-    private List<String> bookNames;
+    String getHttpAuthPassword();
 
-    private String defaultBook;
+    String getLocalRepositoryRoot();
 
-    public List<String> getBookNames() {
-        return bookNames;
-    }
+    String getSshDir();
 
-    public String getDefaultBook() {
-        return defaultBook;
-    }
+    byte[] getPrivateKey();
 }

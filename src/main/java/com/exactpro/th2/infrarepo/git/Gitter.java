@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.git;
 
+import com.exactpro.th2.infrarepo.InconsistentRepositoryStateException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
@@ -32,6 +33,8 @@ import org.eclipse.jgit.transport.sshd.SshdSessionFactory;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +44,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Gitter {
     public static final String REFS_HEADS = "refs/heads/";
+
+    Logger logger = LoggerFactory.getLogger(Gitter.class);
 
     private GitterContext ctx;
 
@@ -183,12 +188,14 @@ public class Gitter {
         } catch (NoHeadException e) {
             // probably there is no git repository in the directory
             // try to clone
-            Git.cloneRepository()
+            try (Git call = Git.cloneRepository()
                     .setBranch(branch)
                     .setURI(ctx.getRemoteRepository())
                     .setDirectory(dir)
                     .setTransportConfigCallback(callback)
-                    .call();
+                    .call()) {
+                logger.info("local repository was not present, proceeding to clone");
+            }
         } catch (WrongRepositoryStateException e) {
             // try to recreate local repository
             recreateCache();
@@ -264,9 +271,8 @@ public class Gitter {
      * @param message commit message string
      * @return null if working tree was clean and no commit happened
      * or commit ref of latest commit in the remote repository
-     * @throws InconsistentRepositoryStateException
-     * If commit or push failed and repository's local cache's
-     * consistency can not be warranted
+     * @throws InconsistentRepositoryStateException If commit or push failed and repository's local cache's
+     *                                              consistency can not be warranted
      * @throws IOException
      * @throws GitAPIException
      */
@@ -296,16 +302,13 @@ public class Gitter {
                     .getName();
 
             String ref = Gitter.REFS_HEADS + branch;
-            Iterator<PushResult> result = git
+
+            for (PushResult pushResult : git
                     .push()
                     .add(ref)
                     .setForce(false)
                     .setTransportConfigCallback(transportConfigCallback(ctx))
-                    .call()
-                    .iterator();
-
-            while (result.hasNext()) {
-                PushResult pushResult = result.next();
+                    .call()) {
                 RemoteRefUpdate update = pushResult.getRemoteUpdate(ref);
                 if (update != null) {
 

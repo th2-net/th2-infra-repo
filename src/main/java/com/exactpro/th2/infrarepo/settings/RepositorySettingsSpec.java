@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.settings;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import java.util.Map;
 
-public class RepositorySettings {
+public class RepositorySettingsSpec {
     // no action will be taken regarding the kubernetes
     private static final String PROPAGATE_OFF = "off";
 

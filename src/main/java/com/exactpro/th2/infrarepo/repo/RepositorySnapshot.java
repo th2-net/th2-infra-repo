@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.exactpro.th2.infrarepo;
+package com.exactpro.th2.infrarepo.repo;
 
+import com.exactpro.th2.infrarepo.ResourceType;
+import com.exactpro.th2.infrarepo.settings.RepositorySettingsResource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Set;
@@ -45,15 +48,15 @@ public class RepositorySnapshot {
     }
 
     @JsonIgnore
-    public RepositorySettings getRepositorySettings() throws JsonProcessingException {
+    public RepositorySettingsResource getRepositorySettings() throws JsonProcessingException {
 
         for (RepositoryResource resource : resources) {
             if (resource.getKind().equals(ResourceType.SettingsFile.kind())) {
                 ObjectMapper mapper = new ObjectMapper();
-                return mapper.readValue(mapper.writeValueAsString(resource.getSpec()), RepositorySettings.class);
+                return mapper.readValue(mapper.writeValueAsString(resource.getSpec()), new TypeReference<>() {
+                });
             }
         }
         return null;
     }
-
 }
