@@ -69,10 +69,12 @@ public class RepositorySettingsSpec {
         return th2BoxConfig.getCradleManager();
     }
 
+    @JsonIgnore
     public String getLogLevelTh2() {
         return th2BoxConfig.getLogging().getLogLevelTh2();
     }
 
+    @JsonIgnore
     public String getLogLevelRoot() {
         return th2BoxConfig.getLogging().getLogLevelRoot();
     }
