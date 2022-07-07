@@ -17,6 +17,7 @@
 package com.exactpro.th2.infrarepo.settings;
 
 import java.util.Map;
+import java.util.Set;
 
 public class Th2BoxConfig {
 
@@ -61,6 +62,17 @@ public class Th2BoxConfig {
 
         public static final String LOG_LEVEL_OFF = "OFF";
 
+        private static final Set<String> acceptableLogValues = Set.of(
+                LOG_LEVEL_FATAL,
+                LOG_LEVEL_ERROR,
+                LOG_LEVEL_WARNING,
+                LOG_LEVEL_INFO,
+                LOG_LEVEL_DEBUG,
+                LOG_LEVEL_TRACE,
+                LOG_LEVEL_ALL,
+                LOG_LEVEL_OFF
+        );
+
         private String logLevelTh2 = LOG_LEVEL_INFO;
 
         private String logLevelRoot = LOG_LEVEL_INFO;
@@ -80,14 +92,7 @@ public class Th2BoxConfig {
                 return;
             }
 
-            if (logLevel.equals(LOG_LEVEL_ERROR) ||
-                    logLevel.equals(LOG_LEVEL_WARNING) ||
-                    logLevel.equals(LOG_LEVEL_INFO) ||
-                    logLevel.equals(LOG_LEVEL_OFF) ||
-                    logLevel.equals(LOG_LEVEL_TRACE) ||
-                    logLevel.equals(LOG_LEVEL_ALL) ||
-                    logLevel.equals(LOG_LEVEL_FATAL) ||
-                    logLevel.equals(LOG_LEVEL_DEBUG)) {
+            if (acceptableLogValues.contains(logLevelTh2)) {
                 this.logLevelTh2 = logLevel;
             } else {
                 throw new IllegalArgumentException(String.format("Unknown value (%s)", logLevel));
@@ -101,14 +106,7 @@ public class Th2BoxConfig {
                 return;
             }
 
-            if (logLevel.equals(LOG_LEVEL_ERROR) ||
-                    logLevel.equals(LOG_LEVEL_WARNING) ||
-                    logLevel.equals(LOG_LEVEL_INFO) ||
-                    logLevel.equals(LOG_LEVEL_OFF) ||
-                    logLevel.equals(LOG_LEVEL_TRACE) ||
-                    logLevel.equals(LOG_LEVEL_ALL) ||
-                    logLevel.equals(LOG_LEVEL_FATAL) ||
-                    logLevel.equals(LOG_LEVEL_DEBUG)) {
+            if (acceptableLogValues.contains(logLevelRoot)) {
                 this.logLevelRoot = logLevel;
             } else {
                 throw new IllegalArgumentException(String.format("Unknown value (%s)", logLevel));

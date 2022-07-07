@@ -57,14 +57,17 @@ public class RepositorySettingsSpec {
         }
     }
 
+    @JsonIgnore
     public Map<String, Object> getMqRouter() {
         return th2BoxConfig.getMqRouter();
     }
 
+    @JsonIgnore
     public Map<String, Object> getGrpcRouter() {
         return th2BoxConfig.getGrpcRouter();
     }
 
+    @JsonIgnore
     public Map<String, Object> getCradleManager() {
         return th2BoxConfig.getCradleManager();
     }
