@@ -71,10 +71,17 @@ public class Repository {
     }
 
     private static Set<RepositoryResource> loadKind(File repositoryRoot, ResourceType kind) {
+        return loadKind(repositoryRoot, kind, new HashMap<>());
+    }
+
+    private static Set<RepositoryResource> loadKind(
+            File repositoryRoot,
+            ResourceType kind,
+            Map<String, RepositoryResource> firstOccurrences
+    ) {
         Logger logger = LoggerFactory.getLogger(Repository.class);
 
         Set<RepositoryResource> resources = new HashSet<>();
-        Map<String, RepositoryResource> firstOccurrences = new HashMap<>();
 
         if (kind.isRepositoryResource()) {
             File dir = new File(repositoryRoot.getAbsolutePath() + "/" + kind.path());
@@ -149,21 +156,30 @@ public class Repository {
     private static Set<RepositoryResource> loadBranch(File repositoryRoot) {
 
         Set<RepositoryResource> resources = new HashSet<>();
+        Map<String, RepositoryResource> firstOccurrences = new HashMap<>();
         for (ResourceType t : ResourceType.values()) {
-            resources.addAll(loadKind(repositoryRoot, t));
+            resources.addAll(loadKind(repositoryRoot, t, firstOccurrences));
         }
 
         return resources;
     }
 
     private static <T> File fileFor(Gitter gitter, GenericResource<T> resource, String extension) {
-
         return new File(
                 gitter.getConfig().getLocalRepositoryRoot()
                         + "/" + gitter.getBranch()
                         + "/" + ResourceType.forKind(resource.getKind()).path()
                         + "/" + resource.getMetadata().getName()
-                        + extension);
+                        + extension
+        );
+    }
+
+    private static File dirFor(Gitter gitter, ResourceType type) {
+        return new File(
+                gitter.getConfig().getLocalRepositoryRoot()
+                        + "/" + gitter.getBranch()
+                        + "/" + type.path()
+        );
     }
 
     private static String extractName(String fileName) {
@@ -375,4 +391,27 @@ public class Repository {
         file.delete();
     }
 
+    /**
+     * Removes link resources resource from the local repository, but does not commit or push changes.
+     * Throws an IllegalArgumentException if resource does not exists
+     *
+     * @param gitter Gitter object for which repository will be updated.
+     *               Must be locked externally as this method does not lock repository by itself
+     * @throws IllegalArgumentException If resource does not exists in the repository
+     */
+    public static void removeLinkResources(Gitter gitter) {
+
+        File dir = dirFor(gitter, ResourceType.Th2Link);
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new IllegalArgumentException("directory does not exist");
+        }
+        if (dir.listFiles() == null || dir.listFiles().length == 0) {
+            dir.delete();
+            return;
+        }
+        for (File file : dir.listFiles()) {
+            file.delete();
+        }
+        dir.delete();
+    }
 }
