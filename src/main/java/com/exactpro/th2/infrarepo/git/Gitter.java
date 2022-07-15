@@ -45,6 +45,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Gitter {
     public static final String REFS_HEADS = "refs/heads/";
 
+    public static final int TIME_OUT = 10;
+
     Logger logger = LoggerFactory.getLogger(Gitter.class);
 
     private GitterContext ctx;
@@ -125,6 +127,7 @@ public class Gitter {
                 httpTransport.setCredentialsProvider(new UsernamePasswordCredentialsProvider(
                         config.getHttpAuthUsername(),
                         config.getHttpAuthPassword()));
+                httpTransport.setTimeout(TIME_OUT);
 
             } else if (transport instanceof SshTransport) {
                 File sshDir = new File(config.getSshDir());
@@ -134,6 +137,7 @@ public class Gitter {
                         .setSshDirectory(sshDir)
                         .build(null);
                 SshTransport sshTransport = (SshTransport) transport;
+                sshTransport.setTimeout(TIME_OUT);
                 sshTransport.setSshSessionFactory(sshSessionFactory);
 
             } else {
