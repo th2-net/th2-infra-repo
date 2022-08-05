@@ -16,12 +16,14 @@
 
 package com.exactpro.th2.infrarepo.repo;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+
 public class RepositoryResource extends GenericResource<Object> {
 
     public RepositoryResource() {
     }
 
-    public RepositoryResource(String apiVersion, String kind, Metadata metadata, Object spec) {
+    public RepositoryResource(String apiVersion, String kind, ObjectMeta metadata, Object spec) {
         super(apiVersion, kind, metadata, spec);
     }
 }

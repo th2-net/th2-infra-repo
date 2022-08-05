@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +102,7 @@ public class Repository {
                     if (f.isFile() && (f.getAbsolutePath().endsWith(".yml") || f.getAbsolutePath().endsWith(".yaml"))) {
                         try {
                             RepositoryResource resource = Repository.loadYAML(f);
-                            RepositoryResource.Metadata meta = resource.getMetadata();
+                            ObjectMeta meta = resource.getMetadata();
 
                             if (meta == null || !extractName(f.getName()).equals(meta.getName())) {
                                 logger.warn("skipping \"{}\" | resource name does not match filename",
