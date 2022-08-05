@@ -18,26 +18,15 @@ package com.exactpro.th2.infrarepo.repo;
 
 import com.exactpro.th2.infrarepo.ResourceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 public class GenericResource<T> {
-    public static class Metadata {
-        private final String name;
-
-        public String getName() {
-            return name;
-        }
-
-        public Metadata(@JsonProperty("name") String name) {
-            this.name = name;
-        }
-    }
 
     private String apiVersion;
 
     private String kind;
 
-    private Metadata metadata;
+    private ObjectMeta metadata;
 
     private T spec;
 
@@ -54,7 +43,7 @@ public class GenericResource<T> {
         this.kind = type.name();
     }
 
-    public GenericResource(String apiVersion, String kind, Metadata metadata, T spec) {
+    public GenericResource(String apiVersion, String kind, ObjectMeta metadata, T spec) {
         this.apiVersion = apiVersion;
         this.kind = kind;
         this.metadata = metadata;
@@ -77,11 +66,11 @@ public class GenericResource<T> {
         this.kind = kind;
     }
 
-    public Metadata getMetadata() {
+    public ObjectMeta getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Metadata metadata) {
+    public void setMetadata(ObjectMeta metadata) {
         this.metadata = metadata;
     }
 
