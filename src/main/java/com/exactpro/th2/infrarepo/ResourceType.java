@@ -18,6 +18,7 @@ package com.exactpro.th2.infrarepo;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public enum ResourceType {
     HelmRelease("HelmRelease", null, "helmreleases", "helm.fluxcd.io/v1"),
@@ -75,6 +76,10 @@ public enum ResourceType {
 
     public static ResourceType forPath(String path) {
         return paths.get(path);
+    }
+
+    public static Set<String> knownKinds() {
+        return kinds.keySet();
     }
 
     public boolean isRepositoryResource() {
