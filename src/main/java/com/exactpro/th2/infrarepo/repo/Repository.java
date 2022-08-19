@@ -116,6 +116,12 @@ public class Repository {
                                 continue;
                             }
 
+                            if (!ResourceType.knownKinds().contains(resource.getKind())) {
+                                logger.error("skipping \"{}\" | Unknown kind \"{}\". Known values are: \"{}\"",
+                                        f.getAbsolutePath(), resource.getKind(), ResourceType.knownKinds());
+                                continue;
+                            }
+
                             if (!ResourceType.forKind(resource.getKind()).path().equals(kind.path())) {
                                 logger.error("skipping \"{}\" | resource is located in wrong directory. kind" +
                                         ": {}, dir:" + " {}", f.getAbsolutePath(), resource.getKind(), kind.path());
