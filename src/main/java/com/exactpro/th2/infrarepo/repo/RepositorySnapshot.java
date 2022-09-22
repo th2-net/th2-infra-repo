@@ -17,7 +17,7 @@
 package com.exactpro.th2.infrarepo.repo;
 
 import com.exactpro.th2.infrarepo.ResourceType;
-import com.exactpro.th2.infrarepo.settings.RepositorySettingsResource;
+import com.exactpro.th2.infrarepo.settings.RepositorySettingsSpec;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,7 +48,7 @@ public class RepositorySnapshot {
     }
 
     @JsonIgnore
-    public RepositorySettingsResource getRepositorySettings() throws JsonProcessingException {
+    public RepositorySettingsSpec getRepositorySettingsSpec() throws JsonProcessingException {
 
         for (RepositoryResource resource : resources) {
             if (resource.getKind().equals(ResourceType.SettingsFile.kind())) {
