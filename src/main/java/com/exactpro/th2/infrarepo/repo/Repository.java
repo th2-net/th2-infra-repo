@@ -60,7 +60,7 @@ public class Repository {
 
     private static <T> void saveYAML(File file, GenericResource<T> resource) throws IOException {
 
-        file.getParentFile().mkdir();
+        file.getParentFile().mkdirs();
         ObjectMapper mapper = new ObjectMapper(
                 new YAMLFactory()
                         .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
@@ -232,8 +232,29 @@ public class Repository {
     public static Set<RepositoryResource> getResourcesByKind(Gitter gitter, ResourceType kind)
             throws IOException, GitAPIException {
 
+        return getResourcesByKind(gitter, kind, true);
+    }
+
+    /**
+     * This method will checkout latest version from the repository
+     * and will create RepositorySnapshot from it.
+     *
+     * @param gitter   Gitter object that will be used to checkout data from the repository.
+     *                 Must be locked externally as this method does not lock repository by itself
+     * @param kind     what kind of resources to load
+     * @param checkout indicates whether the gig checkout should be performed
+     * @return Latest versions of resources for given kind
+     * @throws IOException     If repository IO operation fails
+     * @throws GitAPIException If git checkout operation fails
+     */
+    public static Set<RepositoryResource> getResourcesByKind(Gitter gitter, ResourceType kind, boolean checkout)
+            throws IOException, GitAPIException {
+
         String path = gitter.getConfig().getLocalRepositoryRoot() + "/" + gitter.getBranch();
-        gitter.checkout();
+
+        if (checkout) {
+            gitter.checkout();
+        }
 
         return Repository.loadKind(new File(path), kind);
     }
@@ -250,9 +271,28 @@ public class Repository {
      */
     public static Set<RepositoryResource> getAllBoxesAndStores(Gitter gitter)
             throws IOException, GitAPIException {
+        return getAllBoxesAndStores(gitter, true);
+    }
+
+    /**
+     * This method will checkout latest version from the repository
+     * and will create RepositorySnapshot from it.
+     *
+     * @param gitter   Gitter object that will be used to checkout data from the repository.
+     *                 Must be locked externally as this method does not lock repository by itself
+     * @param checkout indicates whether the gig checkout should be performed
+     * @return Latest versions of resources for Th2Box, Th2CoreBox, Th2Estore and Th2Mstore kind
+     * @throws IOException     If repository IO operation fails
+     * @throws GitAPIException If git checkout operation fails
+     */
+    public static Set<RepositoryResource> getAllBoxesAndStores(Gitter gitter, boolean checkout)
+            throws IOException, GitAPIException {
 
         String path = gitter.getConfig().getLocalRepositoryRoot() + "/" + gitter.getBranch();
-        gitter.checkout();
+
+        if (checkout) {
+            gitter.checkout();
+        }
 
         Set<RepositoryResource> resources = new HashSet<>(Repository.loadKind(new File(path), ResourceType.Th2Box));
         resources.addAll(Repository.loadKind(new File(path), ResourceType.Th2CoreBox));
