@@ -105,13 +105,13 @@ public class Repository {
                             ObjectMeta meta = resource.getMetadata();
 
                             if (meta == null || !extractName(f.getName()).equals(meta.getName())) {
-                                logger.warn("skipping \"{}\" | resource name does not match filename",
+                                logger.error("skipping \"{}\" | resource name does not match filename",
                                         f.getAbsolutePath());
                                 continue;
                             }
 
                             if (!isNameLengthValid(meta.getName())) {
-                                logger.warn("skipping \"{}\" | resource name must be less than {} characters",
+                                logger.error("skipping \"{}\" | resource name must be less than {} characters",
                                         meta.getName(), RESOURCE_NAME_MAX_LENGTH);
                                 continue;
                             }
