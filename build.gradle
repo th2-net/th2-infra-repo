@@ -137,10 +137,10 @@ clean {
 
 
 dependencies {
-    api 'org.eclipse.jgit:org.eclipse.jgit:6.1.0.202203080745-r'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.1.0.202203080745-r'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.3'
-    implementation "io.fabric8:kubernetes-client:5.9.0"
+    api 'org.eclipse.jgit:org.eclipse.jgit:6.4.0.202211300538-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.4.0.202211300538-r'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0'
+    implementation 'io.fabric8:kubernetes-client:6.3.1'
 }
 
 jar {
