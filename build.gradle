@@ -167,3 +167,9 @@ jar {
 test {
     useJUnitPlatform()
 }
+
+configurations {
+    compileClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
