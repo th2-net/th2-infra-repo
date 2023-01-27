@@ -21,37 +21,41 @@ import java.util.Map;
 import java.util.Set;
 
 public enum ResourceType {
-    HelmRelease("HelmRelease", null, "helmreleases", "helm.fluxcd.io/v1"),
+    SettingsFile("SettingsFile", "", false),
+
+    HelmRelease("HelmRelease", null, false),
 
     @Deprecated
-    Th2Link("Th2Link", "links", "th2links", "th2.exactpro.com/v1"),
+    Th2Link("Th2Link", "links", false),
 
-    Th2Dictionary("Th2Dictionary", "dictionaries", "th2dictionaries", "th2.exactpro.com/v1"),
+    Th2Dictionary("Th2Dictionary", "dictionaries"),
 
-    Th2CoreBox("Th2CoreBox", "core", "th2coreboxes", "th2.exactpro.com/v1"),
+    Th2CoreBox("Th2CoreBox", "core"),
 
-    Th2Mstore("Th2Mstore", "core", "th2mstores", "th2.exactpro.com/v1"),
+    Th2Mstore("Th2Mstore", "core"),
 
-    Th2Estore("Th2Estore", "core", "th2estores", "th2.exactpro.com/v1"),
+    Th2Estore("Th2Estore", "core"),
 
-    Th2Box("Th2Box", "boxes", "th2boxes", "th2.exactpro.com/v1"),
+    Th2Box("Th2Box", "boxes"),
 
-    SettingsFile("SettingsFile", "", null, null),
-    UIFile("UIFile", "ui-files", null, null);
+    Th2Job("Th2Job", "jobs");
 
     private final String kind;
 
     private final String path;
 
-    private final String k8sName;
+    private final boolean isMangedResource;
 
-    private final String k8sApiVersion;
-
-    ResourceType(String kind, String path, String k8sName, String k8sApiVersion) {
+    ResourceType(String kind, String path, boolean isMangedResource) {
         this.kind = kind;
         this.path = path;
-        this.k8sName = k8sName;
-        this.k8sApiVersion = k8sApiVersion;
+        this.isMangedResource = isMangedResource;
+    }
+
+    ResourceType(String kind, String path) {
+        this.kind = kind;
+        this.path = path;
+        this.isMangedResource = true;
     }
 
     public String kind() {
@@ -62,20 +66,8 @@ public enum ResourceType {
         return path;
     }
 
-    public String k8sName() {
-        return k8sName;
-    }
-
-    public String k8sApiVersion() {
-        return k8sApiVersion;
-    }
-
     public static ResourceType forKind(String kind) {
         return kinds.get(kind);
-    }
-
-    public static ResourceType forPath(String path) {
-        return paths.get(path);
     }
 
     public static Set<String> knownKinds() {
@@ -86,18 +78,15 @@ public enum ResourceType {
         return path != null;
     }
 
-    public boolean isK8sResource() {
-        return k8sName != null;
+    public boolean isMangedResource() {
+        return isMangedResource;
     }
 
     private static final Map<String, ResourceType> kinds = new HashMap<>();
 
-    private static final Map<String, ResourceType> paths = new HashMap<>();
-
     static {
         for (ResourceType t : ResourceType.values()) {
             kinds.put(t.kind(), t);
-            paths.put(t.path(), t);
         }
     }
 }
