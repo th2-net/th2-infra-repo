@@ -28,13 +28,13 @@ public class SchemaUtils {
     ) {
         Map<String, Map<String, RepositoryResource>> repositoryMap = new HashMap<>();
         for (ResourceType t : ResourceType.values()) {
-            if (t.isK8sResource()) {
+            if (t.isMangedResource()) {
                 repositoryMap.put(t.kind(), new HashMap<>());
             }
         }
 
         for (RepositoryResource resource : repositoryResources) {
-            if (ResourceType.forKind(resource.getKind()).isK8sResource()) {
+            if (ResourceType.forKind(resource.getKind()).isMangedResource()) {
                 Map<String, RepositoryResource> typeMap = repositoryMap.get(resource.getKind());
                 typeMap.put(resource.getMetadata().getName(), resource);
             }
