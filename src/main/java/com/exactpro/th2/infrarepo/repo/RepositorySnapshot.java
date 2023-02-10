@@ -18,21 +18,27 @@ package com.exactpro.th2.infrarepo.repo;
 
 import com.exactpro.th2.infrarepo.ResourceType;
 import com.exactpro.th2.infrarepo.settings.RepositorySettingsSpec;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Set;
 
+import static com.exactpro.th2.infrarepo.SchemaUtils.JSON_MAPPER;
+
 public class RepositorySnapshot {
 
-    private String commitRef;
+    private final String commitRef;
 
-    private Set<RepositoryResource> resources;
+    private final Set<RepositoryResource> resources;
 
-    public RepositorySnapshot(String commitRef) {
+    private RepositorySettingsSpec repositorySettingsSpec;
+
+    public RepositorySnapshot(String commitRef, Set<RepositoryResource> resources) {
         this.commitRef = commitRef;
+        this.resources = resources;
+        for (RepositoryResource resource : resources) {
+            if (resource.getKind().equals(ResourceType.SettingsFile.kind())) {
+                repositorySettingsSpec = JSON_MAPPER.convertValue(resource.getSpec(), RepositorySettingsSpec.class);
+            }
+        }
     }
 
     public String getCommitRef() {
@@ -43,20 +49,7 @@ public class RepositorySnapshot {
         return resources;
     }
 
-    public void setResources(Set<RepositoryResource> resources) {
-        this.resources = resources;
-    }
-
-    @JsonIgnore
-    public RepositorySettingsSpec getRepositorySettingsSpec() throws JsonProcessingException {
-
-        for (RepositoryResource resource : resources) {
-            if (resource.getKind().equals(ResourceType.SettingsFile.kind())) {
-                ObjectMapper mapper = new ObjectMapper();
-                return mapper.readValue(mapper.writeValueAsString(resource.getSpec()), new TypeReference<>() {
-                });
-            }
-        }
-        return null;
+    public RepositorySettingsSpec getRepositorySettingsSpec() {
+        return repositorySettingsSpec;
     }
 }

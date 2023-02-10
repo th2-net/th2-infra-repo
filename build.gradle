@@ -8,6 +8,9 @@ plugins {
 }
 
 ext {
+    fabric8_version = '6.3.1'
+    jackson_dataformat_version = '2.14.0'
+    jgit_version = '6.4.0.202211300538-r'
     sharedDir = file("${project.rootDir}/libs")
 }
 group = 'com.exactpro.th2'
@@ -137,10 +140,10 @@ clean {
 
 
 dependencies {
-    api 'org.eclipse.jgit:org.eclipse.jgit:6.4.0.202211300538-r'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.4.0.202211300538-r'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0'
-    implementation 'io.fabric8:kubernetes-client:6.3.1'
+    api "org.eclipse.jgit:org.eclipse.jgit:${jgit_version}"
+    implementation "org.eclipse.jgit:org.eclipse.jgit.ssh.apache:${jgit_version}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jackson_dataformat_version}"
+    implementation "io.fabric8:kubernetes-client:${fabric8_version}"
 }
 
 jar {
