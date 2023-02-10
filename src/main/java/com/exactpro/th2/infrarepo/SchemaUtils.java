@@ -17,12 +17,25 @@
 package com.exactpro.th2.infrarepo;
 
 import com.exactpro.th2.infrarepo.repo.RepositoryResource;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class SchemaUtils {
+
+    public static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+
+    public static final ObjectMapper YAML_MAPPER = new ObjectMapper(
+            new YAMLFactory()
+                    .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                    .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+    ).setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
     public static Map<String, Map<String, RepositoryResource>> convertToRepositoryMap(
             Set<RepositoryResource> repositoryResources
     ) {

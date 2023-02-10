@@ -19,11 +19,6 @@ package com.exactpro.th2.infrarepo.repo;
 import com.exactpro.th2.infrarepo.ResourceType;
 import com.exactpro.th2.infrarepo.git.Gitter;
 import com.exactpro.th2.infrarepo.settings.RepositorySettingsResource;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -37,22 +32,25 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static com.exactpro.th2.infrarepo.SchemaUtils.JSON_MAPPER;
+import static com.exactpro.th2.infrarepo.SchemaUtils.YAML_MAPPER;
+
 public class Repository {
 
     public static final int RESOURCE_NAME_MAX_LENGTH = 64;
 
-    public static final String YML_EXTENSION = ".yml";
+    public static final String YML_ALIAS = ".yml";
 
-    public static final String YAML_EXTENSION = ".yaml";
+    public static final String YAML_ALIAS = ".yaml";
 
-    private static final ObjectMapper generalMapper = new ObjectMapper();
+    private static final String SETTINGS_FILE_NAME = "infra-mgr-config";
+
+    private static Logger logger = LoggerFactory.getLogger(Repository.class);
 
     private static RepositoryResource loadYAML(File file) throws IOException {
 
         String contents = Files.readString(file.toPath());
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
-                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
-        RepositoryResource resource = mapper.readValue(contents, RepositoryResource.class);
+        RepositoryResource resource = YAML_MAPPER.readValue(contents, RepositoryResource.class);
         resource.setSourceHash(Repository.digest(contents));
 
         return resource;
@@ -61,12 +59,7 @@ public class Repository {
     private static <T> void saveYAML(File file, GenericResource<T> resource) throws IOException {
 
         file.getParentFile().mkdirs();
-        ObjectMapper mapper = new ObjectMapper(
-                new YAMLFactory()
-                        .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                        .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
-        ).setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        String contents = mapper.writeValueAsString(resource);
+        String contents = YAML_MAPPER.writeValueAsString(resource);
         resource.setSourceHash(Repository.digest(contents));
         Files.writeString(file.toPath(), contents);
     }
@@ -80,8 +73,6 @@ public class Repository {
             ResourceType kind,
             Map<String, RepositoryResource> firstOccurrences
     ) {
-        Logger logger = LoggerFactory.getLogger(Repository.class);
-
         Set<RepositoryResource> resources = new HashSet<>();
 
         if (kind.isRepositoryResource()) {
@@ -318,9 +309,7 @@ public class Repository {
         String commitRef = gitter.checkout();
         Set<RepositoryResource> resources = Repository.loadBranch(new File(path));
 
-        RepositorySnapshot snapshot = new RepositorySnapshot(commitRef);
-        snapshot.setResources(resources);
-        return snapshot;
+        return new RepositorySnapshot(commitRef, resources);
     }
 
     /**
@@ -335,19 +324,14 @@ public class Repository {
      */
     public static RepositorySettingsResource getSettings(Gitter gitter) throws IOException, GitAPIException {
         gitter.checkout();
-        String settingsFileName = "infra-mgr-config";
         String pathYml = String.format("%s/%s/%s",
-                gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), settingsFileName + YML_EXTENSION);
+                gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), SETTINGS_FILE_NAME + YML_ALIAS);
         try {
-            return generalMapper.readValue(
-                    generalMapper.writeValueAsString(loadYAML(new File(pathYml))), RepositorySettingsResource.class
-            );
+            return JSON_MAPPER.convertValue(loadYAML(new File(pathYml)), RepositorySettingsResource.class);
         } catch (NoSuchFileException e) {
             String pathYaml = String.format("%s/%s/%s",
-                    gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), settingsFileName + YAML_EXTENSION);
-            return generalMapper.readValue(
-                    generalMapper.writeValueAsString(loadYAML(new File(pathYml))), RepositorySettingsResource.class
-            );
+                    gitter.getConfig().getLocalRepositoryRoot(), gitter.getBranch(), SETTINGS_FILE_NAME + YAML_ALIAS);
+            return JSON_MAPPER.convertValue(loadYAML(new File(pathYaml)), RepositorySettingsResource.class);
         }
     }
 
@@ -365,12 +349,12 @@ public class Repository {
     public static RepositoryResource getResource(Gitter gitter, String kind, String resourceName) throws IOException {
         String kindPath = ResourceType.forKind(kind).path();
         String pathYml = String.format("%s/%s/%s/%s", gitter.getConfig().getLocalRepositoryRoot(),
-                gitter.getBranch(), kindPath, resourceName + YML_EXTENSION);
+                gitter.getBranch(), kindPath, resourceName + YML_ALIAS);
         try {
             return loadYAML(new File(pathYml));
         } catch (Exception e) {
             String pathYaml = String.format("%s/%s/%s/%s", gitter.getConfig().getLocalRepositoryRoot(),
-                    gitter.getBranch(), kindPath, resourceName + YAML_EXTENSION);
+                    gitter.getBranch(), kindPath, resourceName + YAML_ALIAS);
             return loadYAML(new File(pathYaml));
         }
     }
@@ -387,7 +371,7 @@ public class Repository {
      */
     public static void add(Gitter gitter, RepositoryResource resource) throws IOException {
 
-        File file = fileFor(gitter, resource, YML_EXTENSION);
+        File file = fileFor(gitter, resource, YML_ALIAS);
         if (file.exists()) {
             throw new IllegalArgumentException("resource already exist");
         }
@@ -407,7 +391,7 @@ public class Repository {
     public static <T> void update(Gitter gitter, GenericResource<T> resource) throws IOException {
 
         String yamlExtension = ".yaml";
-        File fileYml = fileFor(gitter, resource, YML_EXTENSION);
+        File fileYml = fileFor(gitter, resource, YML_ALIAS);
         File fileYaml = fileFor(gitter, resource, yamlExtension);
         if (fileYml.exists() && fileYml.isFile()) {
             Repository.saveYAML(fileYml, resource);
@@ -431,7 +415,7 @@ public class Repository {
      */
     public static void remove(Gitter gitter, RepositoryResource resource) {
 
-        File file = fileFor(gitter, resource, YML_EXTENSION);
+        File file = fileFor(gitter, resource, YML_ALIAS);
         if (!file.exists() || !file.isFile()) {
             throw new IllegalArgumentException("resource does not exist");
         }

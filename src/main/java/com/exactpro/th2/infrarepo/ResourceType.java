@@ -21,40 +21,43 @@ import java.util.Map;
 import java.util.Set;
 
 public enum ResourceType {
-    SettingsFile("SettingsFile", "", false),
+    SettingsFile("SettingsFile", "", null, false),
 
-    HelmRelease("HelmRelease", null, false),
+    HelmRelease("HelmRelease", null, null, false),
 
     @Deprecated
-    Th2Link("Th2Link", "links", false),
+    Th2Link("Th2Link", "links", "th2.exactpro.com/v1", false),
 
-    Th2Dictionary("Th2Dictionary", "dictionaries"),
+    Th2Dictionary("Th2Dictionary", "dictionaries", "th2.exactpro.com/v1"),
 
-    Th2CoreBox("Th2CoreBox", "core"),
+    Th2CoreBox("Th2CoreBox", "core", "th2.exactpro.com/v2"),
 
-    Th2Mstore("Th2Mstore", "core"),
+    Th2Mstore("Th2Mstore", "core", "th2.exactpro.com/v2"),
 
-    Th2Estore("Th2Estore", "core"),
+    Th2Estore("Th2Estore", "core", "th2.exactpro.com/v2"),
 
-    Th2Box("Th2Box", "boxes"),
+    Th2Box("Th2Box", "boxes", "th2.exactpro.com/v2"),
 
-    Th2Job("Th2Job", "jobs");
+    Th2Job("Th2Job", "jobs", "th2.exactpro.com/v2");
 
     private final String kind;
 
     private final String path;
 
+    private final String apiVersion;
     private final boolean isMangedResource;
 
-    ResourceType(String kind, String path, boolean isMangedResource) {
+    ResourceType(String kind, String path, String apiVersion, boolean isMangedResource) {
         this.kind = kind;
         this.path = path;
+        this.apiVersion = apiVersion;
         this.isMangedResource = isMangedResource;
     }
 
-    ResourceType(String kind, String path) {
+    ResourceType(String kind, String path, String apiVersion) {
         this.kind = kind;
         this.path = path;
+        this.apiVersion = apiVersion;
         this.isMangedResource = true;
     }
 
@@ -76,6 +79,10 @@ public enum ResourceType {
 
     public boolean isRepositoryResource() {
         return path != null;
+    }
+
+    public String k8sApiVersion() {
+        return apiVersion;
     }
 
     public boolean isMangedResource() {
