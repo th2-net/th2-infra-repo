@@ -17,6 +17,7 @@
 package com.exactpro.th2.infrarepo;
 
 import com.exactpro.th2.infrarepo.repo.RepositoryResource;
+import com.exactpro.th2.infrarepo.settings.RepositorySettingsResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -53,5 +54,14 @@ public class SchemaUtils {
             }
         }
         return repositoryMap;
+    }
+
+    public static RepositorySettingsResource findSettingsResource(
+            Map<String, Map<String, RepositoryResource>> repositoryMap) {
+        var settings = repositoryMap.get(ResourceType.SettingsFile.kind())
+                .values()
+                .iterator()
+                .next();
+        return JSON_MAPPER.convertValue(settings, RepositorySettingsResource.class);
     }
 }
