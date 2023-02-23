@@ -45,6 +45,7 @@ public enum ResourceType {
     private final String path;
 
     private final String apiVersion;
+
     private final boolean isMangedResource;
 
     ResourceType(String kind, String path, String apiVersion, boolean isMangedResource) {
