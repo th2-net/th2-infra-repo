@@ -6,12 +6,14 @@ plugins {
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
     id 'signing'
     id "org.owasp.dependencycheck" version "${owaspVersion}"
+    id "org.jetbrains.kotlin.jvm" version "${kotlin_version}"
 }
 
 ext {
     fabric8_version = '6.4.1'
     jackson_dataformat_version = '2.14.2'
     jgit_version = '6.4.0.202211300538-r'
+    okhttp_version = '4.10.0'
     sharedDir = file("${project.rootDir}/libs")
 }
 group = 'com.exactpro.th2'
@@ -142,6 +144,10 @@ clean {
 
 dependencies {
     api "org.eclipse.jgit:org.eclipse.jgit:${jgit_version}"
+
+    // TODO only used to avoid vulnerability, can be removed once fabric8 is updated
+    implementation "com.squareup.okhttp3:okhttp:${okhttp_version}"
+
     implementation "org.eclipse.jgit:org.eclipse.jgit.ssh.apache:${jgit_version}"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jackson_dataformat_version}"
     implementation "io.fabric8:kubernetes-client:${fabric8_version}"
