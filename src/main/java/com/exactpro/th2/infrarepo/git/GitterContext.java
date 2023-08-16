@@ -32,6 +32,8 @@ public class GitterContext implements GitConfig {
 
     private final byte[] privateKey;
 
+    private final boolean enableSslVerification;
+
     private volatile Map<String, Gitter> gitters;
 
     private static volatile Map<GitterContext, GitterContext> contexts;
@@ -115,6 +117,7 @@ public class GitterContext implements GitConfig {
         localRepositoryRoot = config.getLocalRepositoryRoot();
         sshDir = config.getSshDir();
         privateKey = config.getPrivateKey();
+        enableSslVerification = config.isEnableSslVerification();
     }
 
     @Override
@@ -148,6 +151,12 @@ public class GitterContext implements GitConfig {
     }
 
     @Override
+    public boolean isEnableSslVerification() {
+        return enableSslVerification;
+    }
+
+    //TODO: equals and hashCode methods use different set of properties
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -161,6 +170,7 @@ public class GitterContext implements GitConfig {
                 Objects.equals(this.httpAuthUsername, c.httpAuthUsername) &&
                 Objects.equals(this.httpAuthPassword, c.httpAuthPassword) &&
                 Objects.equals(this.sshDir, c.sshDir) &&
+                Objects.equals(this.enableSslVerification, c.enableSslVerification) &&
                 Arrays.equals(this.privateKey, c.privateKey);
     }
 

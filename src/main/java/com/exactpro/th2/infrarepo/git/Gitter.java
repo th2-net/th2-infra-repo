@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@ import org.eclipse.jgit.errors.EntryExistsException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactory;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,38 +180,36 @@ public class Gitter {
         if (!dir.exists() && !dir.mkdirs()) {
             throw new IOException(String.format("Error creating repository directory %s", targetDir));
         }
-
-        Repository repo = new FileRepository(repositoryDir);
-        Git git = new Git(repo);
-
-        // try to pull branch
-        try {
-            git
-                    .pull()
-                    .setStrategy(MergeStrategy.THEIRS)
-                    .setTransportConfigCallback(callback)
-                    .call();
-        } catch (NoHeadException e) {
-            // probably there is no git repository in the directory
-            // try to clone
-            try (Git call = Git.cloneRepository()
-                    .setBranch(branch)
-                    .setURI(ctx.getRemoteRepository())
-                    .setDirectory(dir)
-                    .setTransportConfigCallback(callback)
-                    .call()) {
-                logger.info("local repository was not present, proceeding to clone");
+        try (Git git = createGit()) {
+            // try to pull branch
+            try {
+                git
+                        .pull()
+                        .setStrategy(MergeStrategy.THEIRS)
+                        .setTransportConfigCallback(callback)
+                        .call();
+            } catch (NoHeadException e) {
+                // probably there is no git repository in the directory
+                // try to clone
+                try (Git call = Git.cloneRepository()
+                        .setBranch(branch)
+                        .setURI(ctx.getRemoteRepository())
+                        .setDirectory(dir)
+                        .setTransportConfigCallback(callback)
+                        .call()) {
+                    logger.info("local repository was not present, proceeding to clone");
+                }
+            } catch (WrongRepositoryStateException e) {
+                // try to recreate local repository
+                recreateCache();
             }
-        } catch (WrongRepositoryStateException e) {
-            // try to recreate local repository
-            recreateCache();
-        }
 
-        Ref ref = git.checkout()
-                .setName(branch)
-                .setForced(true)
-                .call();
-        return ref.getObjectId().getName();
+            Ref ref = git.checkout()
+                    .setName(branch)
+                    .setForced(true)
+                    .call();
+            return ref.getObjectId().getName();
+        }
     }
 
     /**
@@ -237,9 +237,7 @@ public class Gitter {
 
         checkAndGetLocalCacheRoot();
 
-        try {
-            Repository repo = new FileRepository(repositoryDir);
-            Git git = new Git(repo);
+        try (Git git = createGit()) {
             Ref ref = git.reset().setMode(ResetCommand.ResetType.HARD).call();
             return ref.getObjectId().getName();
         } catch (Exception e) {
@@ -284,21 +282,20 @@ public class Gitter {
             throws IOException, GitAPIException, InconsistentRepositoryStateException {
 
         checkAndGetLocalCacheRoot();
-        Repository repo = new FileRepository(repositoryDir);
-        Git git = new Git(repo);
-        if (git.status().call().isClean()) {
-            return null;
-        }
 
-        git.add()
-                .setUpdate(true)
-                .addFilepattern(".")
-                .call();
-        git.add()
-                .addFilepattern(".")
-                .call();
+        try (Git git = createGit()) {
+            if (git.status().call().isClean()) {
+                return null;
+            }
 
-        try {
+            git.add()
+                    .setUpdate(true)
+                    .addFilepattern(".")
+                    .call();
+            git.add()
+                    .addFilepattern(".")
+                    .call();
+
             String commitRef = git.commit()
                     .setMessage(message)
                     .call()
@@ -358,20 +355,20 @@ public class Gitter {
         try {
             checkout(sourceBranch, localCacheRoot);
 
-            Repository repo = new FileRepository(repositoryDir);
-            Git git = new Git(repo);
-            git.branchCreate()
-                    .setName(branch)
-                    .call();
-            Ref ref = git.checkout()
-                    .setName(branch)
-                    .call();
-            git.push()
-                    .add(ref)
-                    .setTransportConfigCallback(callback)
-                    .call();
+            try (Git git = createGit()) {
+                git.branchCreate()
+                        .setName(branch)
+                        .call();
+                Ref ref = git.checkout()
+                        .setName(branch)
+                        .call();
+                git.push()
+                        .add(ref)
+                        .setTransportConfigCallback(callback)
+                        .call();
 
-            return ref.getObjectId().getName();
+                return ref.getObjectId().getName();
+            }
         } catch (Exception e) {
             try {
                 FileUtils.delete(new File(localCacheRoot), FileUtils.RECURSIVE);
@@ -381,6 +378,21 @@ public class Gitter {
             }
             throw e;
         }
+    }
+
+    @NotNull
+    private Git createGit() throws IOException {
+        Repository repo = new FileRepository(repositoryDir);
+        Git git = new Git(repo);
+
+        try {
+            StoredConfig config = git.getRepository().getConfig();
+            config.setBoolean("http", null, "sslVerify", ctx.isEnableSslVerification());
+            config.save();
+        } catch (RuntimeException e) {
+            logger.error("Disable ssl verification failed", e);
+        }
+        return git;
     }
 
     private File checkAndGetLocalCacheRoot() {
