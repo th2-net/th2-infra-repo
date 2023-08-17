@@ -29,35 +29,56 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
-import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.transport.HttpTransport;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactory;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+@SuppressWarnings("unused")
 public class Gitter {
     public static final String REFS_HEADS = "refs/heads/";
 
     public static final int TIME_OUT = 10;
 
+    public static final String GIT_SSL_VERIFY = "sslVerify";
+
+    public static final String GIT_SECTION_REMOTE = "remote";
+
+    public static final String GIT_SUBSECTION_ORIGIN = "origin";
+
+    public static final String GIT_SECTION_NAME_URL = "url";
+
+    public static final String GIT_SCHEMA_HTTP = "http";
+
+    public static final String GIT_SCHEMA_HTTPS = "https";
+
     Logger logger = LoggerFactory.getLogger(Gitter.class);
 
-    private GitterContext ctx;
+    private final GitterContext ctx;
 
-    private String branch;
+    private final String branch;
 
-    private Lock lock;
+    private final Lock lock;
 
-    private TransportConfigCallback callback;
+    private final TransportConfigCallback callback;
 
     private final String localCacheRoot;
 
@@ -180,36 +201,48 @@ public class Gitter {
         if (!dir.exists() && !dir.mkdirs()) {
             throw new IOException(String.format("Error creating repository directory %s", targetDir));
         }
-        try (Git git = createGit()) {
-            // try to pull branch
-            try {
-                git
-                        .pull()
-                        .setStrategy(MergeStrategy.THEIRS)
-                        .setTransportConfigCallback(callback)
-                        .call();
-            } catch (NoHeadException e) {
-                // probably there is no git repository in the directory
-                // try to clone
-                try (Git call = Git.cloneRepository()
-                        .setBranch(branch)
-                        .setURI(ctx.getRemoteRepository())
-                        .setDirectory(dir)
-                        .setTransportConfigCallback(callback)
-                        .call()) {
-                    logger.info("local repository was not present, proceeding to clone");
-                }
-            } catch (WrongRepositoryStateException e) {
-                // try to recreate local repository
-                recreateCache();
-            }
 
-            Ref ref = git.checkout()
-                    .setName(branch)
-                    .setForced(true)
+        Repository repo = new FileRepository(repositoryDir);
+        Git git = new Git(repo);
+
+        // try to pull branch
+        try {
+            git
+                    .pull()
+                    .setStrategy(MergeStrategy.THEIRS)
+                    .setTransportConfigCallback(callback)
                     .call();
-            return ref.getObjectId().getName();
+        } catch (NoHeadException e) {
+            // probably there is no git repository in the directory
+            // try to clone
+            try (Git ignored = Git.cloneRepository()
+                    .setBranch(branch)
+                    .setURI(ctx.getRemoteRepository())
+                    .setDirectory(dir)
+                    .setTransportConfigCallback(callback)
+                    .call()) {
+                logger.info("local repository was not present, proceeding to clone");
+
+                updateGitConfig(git);
+            } catch (URISyntaxException ex) {
+                logger.error(
+                        "Domain url calculation from {} url failed",
+                        git.getRepository()
+                                .getConfig()
+                                .getString(GIT_SECTION_REMOTE, GIT_SUBSECTION_ORIGIN, GIT_SECTION_NAME_URL),
+                        e
+                );
+            }
+        } catch (WrongRepositoryStateException e) {
+            // try to recreate local repository
+            recreateCache();
         }
+
+        Ref ref = git.checkout()
+                .setName(branch)
+                .setForced(true)
+                .call();
+        return ref.getObjectId().getName();
     }
 
     /**
@@ -217,8 +250,6 @@ public class Gitter {
      * the latest commit
      *
      * @return commit ref for latest commit
-     * @throws IOException
-     * @throws GitAPIException
      */
     public String checkout() throws IOException, GitAPIException {
 
@@ -237,7 +268,9 @@ public class Gitter {
 
         checkAndGetLocalCacheRoot();
 
-        try (Git git = createGit()) {
+        try {
+            Repository repo = new FileRepository(repositoryDir);
+            Git git = new Git(repo);
             Ref ref = git.reset().setMode(ResetCommand.ResetType.HARD).call();
             return ref.getObjectId().getName();
         } catch (Exception e) {
@@ -252,8 +285,6 @@ public class Gitter {
      * Can be used to repair de-synchronized local and remote repositories due to push or merge conflicts.
      *
      * @return commit ref of latest commit in repository
-     * @throws IOException
-     * @throws GitAPIException
      */
     public String recreateCache() throws IOException, GitAPIException {
 
@@ -275,27 +306,26 @@ public class Gitter {
      * or commit ref of latest commit in the remote repository
      * @throws InconsistentRepositoryStateException If commit or push failed and repository's local cache's
      *                                              consistency can not be warranted
-     * @throws IOException
-     * @throws GitAPIException
      */
     public String commitAndPush(String message)
             throws IOException, GitAPIException, InconsistentRepositoryStateException {
 
         checkAndGetLocalCacheRoot();
+        Repository repo = new FileRepository(repositoryDir);
+        Git git = new Git(repo);
+        if (git.status().call().isClean()) {
+            return null;
+        }
 
-        try (Git git = createGit()) {
-            if (git.status().call().isClean()) {
-                return null;
-            }
+        git.add()
+                .setUpdate(true)
+                .addFilepattern(".")
+                .call();
+        git.add()
+                .addFilepattern(".")
+                .call();
 
-            git.add()
-                    .setUpdate(true)
-                    .addFilepattern(".")
-                    .call();
-            git.add()
-                    .addFilepattern(".")
-                    .call();
-
+        try {
             String commitRef = git.commit()
                     .setMessage(message)
                     .call()
@@ -340,7 +370,6 @@ public class Gitter {
      *
      * @param sourceBranch branch from which new branch will be created
      * @return commit ref of the new branch
-     * @throws Exception
      */
     public String createBranch(String sourceBranch) throws Exception {
 
@@ -355,20 +384,20 @@ public class Gitter {
         try {
             checkout(sourceBranch, localCacheRoot);
 
-            try (Git git = createGit()) {
-                git.branchCreate()
-                        .setName(branch)
-                        .call();
-                Ref ref = git.checkout()
-                        .setName(branch)
-                        .call();
-                git.push()
-                        .add(ref)
-                        .setTransportConfigCallback(callback)
-                        .call();
+            Repository repo = new FileRepository(repositoryDir);
+            Git git = new Git(repo);
+            git.branchCreate()
+                    .setName(branch)
+                    .call();
+            Ref ref = git.checkout()
+                    .setName(branch)
+                    .call();
+            git.push()
+                    .add(ref)
+                    .setTransportConfigCallback(callback)
+                    .call();
 
-                return ref.getObjectId().getName();
-            }
+            return ref.getObjectId().getName();
         } catch (Exception e) {
             try {
                 FileUtils.delete(new File(localCacheRoot), FileUtils.RECURSIVE);
@@ -380,19 +409,20 @@ public class Gitter {
         }
     }
 
-    @NotNull
-    private Git createGit() throws IOException {
-        Repository repo = new FileRepository(repositoryDir);
-        Git git = new Git(repo);
-
-        try {
-            StoredConfig config = git.getRepository().getConfig();
-            config.setBoolean("http", null, "sslVerify", ctx.isEnableSslVerification());
+    private void updateGitConfig(Git git) throws URISyntaxException, IOException {
+        StoredConfig config = git.getRepository().getConfig();
+        URI uri = new URI(config.getString(GIT_SECTION_REMOTE, GIT_SUBSECTION_ORIGIN, GIT_SECTION_NAME_URL));
+        if (GIT_SCHEMA_HTTPS.equals(uri.getScheme())) {
+            config.setBoolean(
+                    GIT_SCHEMA_HTTP,
+                    GIT_SCHEMA_HTTPS + "://" + uri.getHost(),
+                    GIT_SSL_VERIFY,
+                    ctx.isEnableSslVerification());
+            config.setBoolean(GIT_SCHEMA_HTTP, null, GIT_SSL_VERIFY, ctx.isEnableSslVerification());
             config.save();
-        } catch (RuntimeException e) {
-            logger.error("Disable ssl verification failed", e);
+
+            logger.info("set {} git option = {}", GIT_SSL_VERIFY, ctx.isEnableSslVerification());
         }
-        return git;
     }
 
     private File checkAndGetLocalCacheRoot() {
